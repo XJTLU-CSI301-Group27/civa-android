@@ -7,6 +7,8 @@
 - Default branch: `main`
 - Issues: enabled
 - Actions: enabled
+- Default Actions token: contents read-only
+- Workflows can approve pull requests: disabled
 - Delete branch after merge: enabled
 
 ## Organization Project
