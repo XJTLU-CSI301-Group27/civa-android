@@ -70,4 +70,6 @@ valid `gradlew` project is added.
 - [ ] Unified Android project
 - [ ] Real Android build and unit-test CI
 - [ ] Branch rules that require the real Android CI check
-- [ ] Organization Project and recommended template
+- [x] Organization Project
+- [x] Project marked as an organization template
+- [ ] Project added to the organization's recommended-template list
