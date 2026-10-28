@@ -1,0 +1,49 @@
+name: Bug report
+description: Report reproducible behavior that violates a requirement.
+title: "[Bug] "
+labels:
+  - "type:bug"
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - AC-Recipe
+        - AC-Inventory
+        - BD-Planning
+        - BD-Records
+        - EF-Foundation
+        - EF-UI
+        - EF-Integration
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Data or authorization impact
+      description: State whether inventory, history, permissions, or personal data is affected.

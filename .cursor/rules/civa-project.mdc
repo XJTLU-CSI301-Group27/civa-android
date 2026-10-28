@@ -1,0 +1,29 @@
+---
+description: Civa Android project-wide development and integration rules
+alwaysApply: true
+---
+
+# Civa Android Rules
+
+Before changing code, read:
+
+- `AGENTS.md`
+- `docs/PRODUCT_RULES.md`
+- `docs/DATA_CONTRACT.md`
+- `docs/UI_RULES.md`
+- `docs/INTEGRATION_RULES.md`
+- `docs/TEST_PLAN.md`
+
+Work only on the assigned Issue and feature branch. Do not change public models,
+units, nullability, ownership, navigation, Gradle configuration, or database
+schema as an incidental part of another task.
+
+Reuse shared UI and data interfaces. Do not create duplicate models or a second
+Android project.
+
+Before proposing a push or pull request, run the real preflight checks and report
+their actual results. Never claim an unexecuted check passed and never weaken
+tests to make a build succeed.
+
+Stop and report when a contract, authorization rule, transaction boundary, or
+schema migration is unclear.

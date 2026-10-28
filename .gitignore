@@ -1,0 +1,32 @@
+# Android and Gradle
+.gradle/
+build/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE
+.idea/
+*.iml
+*.hprof
+.DS_Store
+Thumbs.db
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+secrets.properties
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Generated coverage and reports
+coverage/
+reports/

@@ -1,0 +1,53 @@
+name: Feature task
+description: Define a scoped feature or fix with acceptance evidence.
+title: "[Feature] "
+labels:
+  - "type:feature"
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What user-visible or integration outcome is required?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - AC-Recipe
+        - AC-Inventory
+        - BD-Planning
+        - BD-Records
+        - EF-Foundation
+        - EF-UI
+        - EF-Integration
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and contracts
+      description: List blocking Issues, public interfaces, and affected groups.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use observable, testable statements.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required tests
+      description: List unit, integration, UI, or manual checks.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Known risks
+      description: Record data, migration, permission, or compatibility risks.

@@ -1,0 +1,42 @@
+name: Cross-group integration
+description: Coordinate a public contract or multi-module change.
+title: "[Integration] "
+labels:
+  - "type:integration"
+  - "needs-contract"
+body:
+  - type: textarea
+    id: contract
+    attributes:
+      label: Contract
+      description: Describe the interface, data model, or shared behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: groups
+    attributes:
+      label: Affected groups
+      description: List AC, BD, EF, and every caller.
+    validations:
+      required: true
+  - type: textarea
+    id: migration
+    attributes:
+      label: Migration and compatibility
+      description: Explain breaking changes and coordinated rollout.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Integration tests
+      description: List the checks that prove all callers still work.
+    validations:
+      required: true
+  - type: textarea
+    id: definition
+    attributes:
+      label: Definition of done
+      description: State when the contract becomes Agreed, Implemented, and Tested.
+    validations:
+      required: true
