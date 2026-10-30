@@ -1,0 +1,59 @@
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+}
+
+def contractToolchain = new Properties()
+file('contracts/toolchain.properties').withInputStream { contractToolchain.load(it) }
+configurations { contractGenerator }
+dependencies { contractGenerator "org.openapitools:openapi-generator-cli:${contractToolchain.getProperty('openApiGeneratorVersion')}" }
+
+tasks.register('validateContract', JavaExec) {
+    group = 'verification'
+    description = 'Validate the candidate OpenAPI contract; validation does not approve it.'
+    classpath = configurations.contractGenerator
+    mainClass = 'org.openapitools.codegen.OpenAPIGenerator'
+    args 'validate', '-i', file('contracts/openapi.json').absolutePath
+    doFirst {
+        if (!file('contracts/openapi.json').isFile()) {
+            throw new GradleException('Candidate OpenAPI contract is missing.')
+        }
+    }
+}
+
+tasks.register('validateCandidateContract', JavaExec) {
+    group = 'verification'
+    description = 'Validate the unapproved OpenAPI draft for structural errors.'
+    classpath = configurations.contractGenerator
+    mainClass = 'org.openapitools.codegen.OpenAPIGenerator'
+    args 'validate', '-i', file('contracts/openapi.json').absolutePath
+}
+
+tasks.register('generateClient') {
+    group = 'build'
+    dependsOn ':api-client:generateClient'
+}
+
+tasks.register('generateServerApi', Exec) {
+    group = 'build'
+    workingDir file('server')
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        commandLine 'cmd', '/c', '.\\gradlew.bat', 'generateServerApi', '--no-daemon'
+    } else {
+        commandLine './gradlew', 'generateServerApi', '--no-daemon'
+    }
+}
+
+tasks.register('checkCandidateIndex', Exec) {
+    group = 'verification'
+    description = 'Check the review index matches the unapproved OpenAPI draft.'
+    commandLine 'python', 'scripts/contract_index.py', 'contracts/openapi.json',
+            'docs/generated/CONTRACT_INDEX.draft.md', '--check'
+}
+
+tasks.register('checkContracts', Exec) {
+    group = 'verification'
+    description = 'Check the candidate contract and public-surface draft are consistent.'
+    dependsOn 'validateContract', 'checkCandidateIndex'
+    commandLine 'python', 'scripts/check_contracts.py'
+}

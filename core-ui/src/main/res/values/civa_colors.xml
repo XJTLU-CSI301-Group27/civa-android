@@ -1,0 +1,13 @@
+<resources>
+    <!--
+        前端视觉样式尚未确定：团队尚未约定具体配色、字体与主题。
+        以下颜色仅为保证工程可编译的中性占位（Material 灰阶），
+        待团队确认视觉系统后整体替换。此处是「前端样式留白」占位。
+    -->
+    <color name="civa_primary">#616161</color>
+    <color name="civa_primary_dark">#424242</color>
+    <color name="civa_secondary">#9E9E9E</color>
+    <color name="civa_background">#FFFFFF</color>
+    <color name="civa_text">#212121</color>
+    <color name="civa_muted">#757575</color>
+</resources>

@@ -1,0 +1,38 @@
+plugins { alias(libs.plugins.android.library) }
+android {
+    namespace 'edu.xjtlu.civa.core.data'
+    compileSdk 36
+    resourcePrefix 'data_'
+    defaultConfig {
+        minSdk 26
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        javaCompileOptions { annotationProcessorOptions { arguments += ['room.schemaLocation': "$projectDir/schemas".toString()] } }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    buildFeatures { viewBinding true }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/cacheContract')
+    testOptions { unitTests.all { systemProperty 'civa.contract', rootProject.file('contracts/openapi.json').absolutePath } }
+    lint { error 'ResourceName' }
+}
+def copyCacheContract = tasks.register('copyCacheContract', Copy) {
+    from rootProject.file('contracts/openapi.json')
+    into layout.buildDirectory.dir('generated/cacheContract')
+    rename 'openapi.json', 'civa-cache-contract.json'
+}
+tasks.named('preBuild') { dependsOn copyCacheContract }
+dependencies {
+    api project(':api-client')
+    api project(':core-ui')
+    implementation libs.annotation
+    api libs.retrofit
+    implementation libs.retrofit.gson
+    implementation libs.gson
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
+    // Keep the Room processor on the already resolved build-time Guava version.
+    annotationProcessor libs.guava
+    testImplementation libs.junit
+    testImplementation libs.mockwebserver
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.test.junit
+}

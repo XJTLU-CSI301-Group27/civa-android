@@ -1,0 +1,10 @@
+{
+  "apiPackage": "edu.xjtlu.civa.server.api",
+  "modelPackage": "edu.xjtlu.civa.server.api.model",
+  "interfaceOnly": true,
+  "useSpringBoot3": true,
+  "useTags": true,
+  "skipDefaultInterface": true,
+  "openApiNullable": false,
+  "hideGenerationTimestamp": true
+}

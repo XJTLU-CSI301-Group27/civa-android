@@ -1,15 +1,62 @@
 # GitHub Setup
 
+Updated 2026-10-30 from the live repository through the GitHub API. Where the API
+output and this document disagree, the API output is correct.
+
 ## Repository
 
 - URL: https://github.com/XJTLU-CSI301-Group27/civa-android
-- Visibility: private
+- Visibility: public (see "Visibility change" below)
 - Default branch: `main`
 - Issues: enabled
-- Actions: enabled
-- Default Actions token: contents read-only
-- Workflows can approve pull requests: disabled
+- Actions: enabled; all actions and reusable workflows allowed
+- Default Actions token: contents read-only (verified)
+- Workflows can approve pull requests: disabled (verified)
+- Merge methods: squash only (`allow_merge_commit` and `allow_rebase_merge` disabled)
+- Auto-merge: disabled
 - Delete branch after merge: enabled
+
+## Branch protection
+
+`main` is protected by the repository ruleset `main protection`
+(`gh api repos/XJTLU-CSI301-Group27/civa-android/rulesets` returns its id):
+
+- pull request required before merging;
+- one approving review, stale approvals dismissed on new commits;
+- review from a code owner required for the paths listed in `.github/CODEOWNERS`;
+- all review conversations must be resolved;
+- required status check: `CI gate`;
+- branch must be up to date with `main` before merging;
+- linear history required;
+- force pushes and branch deletion blocked;
+- no bypass actors: administrators also need the checks and review.
+
+`.github/CODEOWNERS` is the ownership half of this rule. It only takes effect
+together with "review from a code owner required"; it does not block merges by
+itself.
+
+Because `main` is protected, every change after the bootstrap commit goes
+through a pull request, including CI and documentation-only changes.
+
+## CI
+
+`.github/workflows/ci.yml` is the only workflow. It has four jobs:
+
+| Job | Runs |
+| --- | --- |
+| `Contracts` | contract tool self-tests, `validateContract generateClient generateServerApi checkContracts` |
+| `Android` | `assembleDebug testDebugUnitTest lint` |
+| `Server` | `test bootJar` against a `postgres:16` service |
+| `CI gate` | requires all three jobs to succeed; `skipped`, `cancelled` or `failed` all fail the gate |
+
+`CI gate` is the single required status check, so adding or renaming an inner job
+does not require editing the ruleset. The workflow uses `permissions: contents:
+read`, `fetch-depth: 0`, `persist-credentials: false`, and cancels superseded
+pull-request runs.
+
+The old `.github/workflows/android-ci.yml` bootstrap guard is removed: it skipped
+the build when `gradlew` was missing, so a green `Android CI` check did not prove
+a build.
 
 ## Organization Project
 
@@ -53,33 +100,27 @@ An organization owner must complete this final step:
 4. Select `Civa Android - Development & Integration`.
 5. Save.
 
-## Current GitHub plan limitation
+## Visibility change
 
-The organization is on GitHub Free and the repository is private. GitHub
-returns HTTP 403 when branch protection or repository rulesets are requested:
+This repository was recorded here as private. It is now public, which is also why
+branch protection and rulesets became available on the Free plan (private
+repositories need GitHub Pro or Team for those features).
 
-```text
-Upgrade to GitHub Pro or make this repository public to enable this feature.
-```
+`Civa_GitHub_AI_Preflight_Guide.md` section 13 says not to change visibility just
+to unlock a free feature. The team decided to keep the repository public; record
+any further visibility change here before making it.
 
-Consequences:
+## Known gaps
 
-- Pull requests are the required team convention, but GitHub cannot currently
-  enforce them on this private repository.
-- The Android CI workflow runs, but a failing check cannot currently be made a
-  required merge gate.
-- Administrators must enforce the convention manually until the repository
-  becomes public or the organization obtains a plan with private repository
-  rules.
-
-## CI bootstrap state
-
-The first `Android CI` run passed because the workflow detects that `gradlew`
-does not exist and skips the build with a warning. This is temporary and must
-not be described as a real Android build gate.
-
-After Issue `#2` adds the unified Android project:
-
-1. remove the bootstrap guard from `.github/workflows/android-ci.yml`;
-2. confirm a real build, test, and lint run succeeds;
-3. require the successful CI check if the repository plan supports it.
+- **Organization default repository permission is `admin`**, so all four members
+  are administrators on this repository and can edit or delete the ruleset. The
+  ruleset stops accidental force pushes and untested merges; it does not stop a
+  determined administrator. Setting the organization default to `write` and
+  granting admin only where needed would close this.
+- **No organization teams exist**, so `.github/CODEOWNERS` names an account
+  rather than a team. Creating an `ef` team later means editing CODEOWNERS only.
+- **Enforcement is verified through the API, not through a rejected pull
+  request.** The first real proof is a pull request that has not passed `CI gate`
+  and cannot be merged.
+- The organization Project is not yet on the recommended-template list (manual
+  organization setting above).
