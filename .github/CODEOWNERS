@@ -1,0 +1,21 @@
+# Controlled paths (PROJECT_DOC.md section 12, Civa_GitHub_AI_Preflight_Guide.md section 13).
+# CODEOWNERS expresses ownership; enforcement comes from the "main protection" ruleset,
+# which requires a code owner review for these paths.
+#
+# Use a real, resolvable account. Do not write a role placeholder such as "EF".
+# If the EF lead is a different account, change every line below in one commit.
+
+/.github/                @DumbFoxxxxy
+/scripts/                @DumbFoxxxxy
+/contracts/              @DumbFoxxxxy
+/AGENTS.md               @DumbFoxxxxy
+/PROJECT_DOC.md          @DumbFoxxxxy
+/build.gradle            @DumbFoxxxxy
+/settings.gradle         @DumbFoxxxxy
+/gradle/                 @DumbFoxxxxy
+/gradlew                 @DumbFoxxxxy
+/gradlew.bat             @DumbFoxxxxy
+/server/build.gradle     @DumbFoxxxxy
+/server/settings.gradle  @DumbFoxxxxy
+/server/gradle/          @DumbFoxxxxy
+/server/gradle.lockfile  @DumbFoxxxxy
