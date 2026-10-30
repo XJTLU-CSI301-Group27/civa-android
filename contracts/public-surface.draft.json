@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "status": "DRAFT_INCOMPLETE",
+  "description": "Candidate inventory of implemented cross-module types. Not an approved baseline or a complete guard input.",
+  "allowedDependencies": {
+    "app": ["api-client", "core-ui", "core-data", "feature-ac", "feature-bd", "feature-ef"],
+    "api-client": [],
+    "core-ui": [],
+    "core-data": ["api-client", "core-ui"],
+    "feature-ac": ["api-client", "core-ui", "core-data"],
+    "feature-bd": ["api-client", "core-ui", "core-data"],
+    "feature-ef": ["api-client", "core-ui", "core-data"]
+  },
+  "symbols": [
+    {
+      "type": "edu.xjtlu.civa.core.ui.Route",
+      "kind": "enum",
+      "owner": "EF/F",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "any",
+      "members": ["TODAY", "RECIPES", "RECIPE_DETAIL", "RECIPE_EDIT", "INVENTORY", "INVENTORY_EDIT", "PLAN", "COOKING_CONFIRM", "DIARY", "MEAL_EDIT", "PROFILE", "LOGIN", "HOUSEHOLD", "PREFERENCES"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.ui.NavHost",
+      "kind": "interface",
+      "owner": "EF/F",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "main",
+      "members": ["void navigate(Route route, @Nullable String entityId)"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.ui.QuantityInputs",
+      "kind": "class",
+      "owner": "EF/F",
+      "consumers": ["feature-ac", "feature-bd", "feature-ef"],
+      "thread": "any",
+      "members": ["static Quantity toBase(BigDecimal value, String inputUnit)"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.ui.QuantityInputs.Quantity",
+      "kind": "value",
+      "owner": "EF/F",
+      "consumers": ["feature-ac", "feature-bd", "feature-ef"],
+      "thread": "immutable",
+      "members": ["final BigDecimal amount", "final String unit"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.ui.ApiError",
+      "kind": "value",
+      "owner": "EF/E",
+      "consumers": ["core-data", "feature-ac", "feature-bd", "feature-ef", "app"],
+      "thread": "immutable",
+      "members": ["ApiError(String code, String message, @Nullable String traceId, List<FieldError> fieldErrors)", "final String code", "final String message", "@Nullable final String traceId", "final List<FieldError> fieldErrors"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.ui.ApiError.FieldError",
+      "kind": "value",
+      "owner": "EF/E",
+      "consumers": ["core-data", "feature-ac", "feature-bd", "feature-ef", "app"],
+      "thread": "immutable",
+      "members": ["FieldError(String field, String message)", "final String field", "final String message"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.SessionStore",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "synchronized; token and installation are package-private",
+      "members": ["SessionStore()", "@Nullable String currentUserId()", "@Nullable String currentHouseholdId()", "boolean isLoggedIn()", "void clear()"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.ApiCallback<T>",
+      "kind": "interface",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "callbacks on main thread; success value nullable for 204",
+      "members": ["void onSuccess(@Nullable T value)", "void onError(ApiError error)"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.ApiProvider",
+      "kind": "interface",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "any; submit calls through ApiCalls",
+      "members": ["HouseholdApi household()", "ProfileApi profile()", "RecipeApi recipe()", "InventoryApi inventory()", "PlanningApi planning()", "RecordsApi records()"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.RealApiProvider",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["app"],
+      "thread": "any; one instance per application container",
+      "members": ["RealApiProvider(String baseUrl, SessionStore sessions)"],
+      "incomplete": ["application container", "public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.feature.ef.LoginHost",
+      "kind": "interface",
+      "owner": "EF/E",
+      "consumers": ["app"],
+      "thread": "main",
+      "members": ["AuthRepository authRepository()", "void onAuthenticated()"],
+      "incomplete": ["public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.feature.ef.LoginFragment",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["app"],
+      "thread": "main",
+      "members": ["LoginFragment()"],
+      "incomplete": ["runtime device verification", "public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.feature.ef.HouseholdHost",
+      "kind": "interface",
+      "owner": "EF/E",
+      "consumers": ["app"],
+      "thread": "main",
+      "members": ["ApiProvider api()", "ApiCalls calls()", "AuthRepository authRepository()", "SessionStore sessions()", "void onHouseholdReady()"],
+      "incomplete": ["public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.feature.ef.HouseholdFragment",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["app"],
+      "thread": "main",
+      "members": ["HouseholdFragment()"],
+      "incomplete": ["runtime device verification", "public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.AuthRepository",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ef"],
+      "thread": "calls from any thread; callbacks on main thread",
+      "members": ["AuthRepository(RealApiProvider provider, SessionStore sessions, ApiCalls calls)", "void register(RegisterRequest request, ApiCallback<User> callback)", "void login(LoginRequest request, ApiCallback<User> callback)", "void cancelLogin()", "void logout(ApiCallback<Void> callback)", "void refreshMe(ApiCallback<User> callback)"],
+      "incomplete": ["session cache cleanup", "application container", "public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.CachedResult<T>",
+      "kind": "value",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "immutable; fetchedAt is Unix milliseconds",
+      "members": ["final T data", "final boolean stale", "final long fetchedAt"],
+      "incomplete": ["public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.ApiCalls",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "enqueue from any thread; callbacks on main thread",
+      "members": ["ApiCalls(SessionStore sessions)", "ApiCalls(SessionStore sessions, Runnable unauthorized)", "ApiCalls(Context context, SessionStore sessions, Runnable unauthorized)", "<T> void enqueue(Call<T> call, ApiCallback<T> callback)", "<T> void enqueueCached(Call<T> call, String cacheKey, Class<T> type, ApiCallback<CachedResult<T>> callback)", "PendingWriteStore pendingWrites()"],
+      "incomplete": ["complete DTO schema validation", "authentication lifecycle", "public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.PendingWriteStore",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "record/listPending/confirm from any thread; callbacks on main thread",
+      "members": ["void record(String key, String userId, @Nullable String householdId, String operationId, String canonicalPayload, @Nullable String mediaPrivatePath, @Nullable String mediaSha256, ApiCallback<Void> callback)", "void listPending(String userId, ApiCallback<List<PendingWrite>> callback)", "void confirm(String userId, String key, ApiCallback<Void> callback)"],
+      "incomplete": ["household UI consumer", "public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.core.data.PendingWrite",
+      "kind": "value",
+      "owner": "EF/E",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
+      "thread": "immutable",
+      "members": ["final String key", "final String userId", "@Nullable final String householdId", "final String operationId", "final String canonicalPayload", "final long createdAt", "final boolean needsReview", "@Nullable final String mediaPrivatePath", "@Nullable final String mediaSha256"],
+      "incomplete": ["public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.auth.ApiExceptionHandler",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["server household"],
+      "thread": "request thread",
+      "members": ["ApiExceptionHandler()", "static ResponseEntity<Map<String, Object>> response(int status, String code, HttpServletRequest request, HttpHeaders headers)"],
+      "incomplete": ["public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.application.CanonicalRequestDigest",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["server application", "server household"],
+      "thread": "any; ObjectMapper must not be reconfigured concurrently",
+      "members": ["CanonicalRequestDigest(ObjectMapper mapper, JsonNode schemas)", "byte[] digestJson(String method, String path, @Nullable String payload, @Nullable JsonNode requestSchema)"],
+      "incomplete": ["multipart", "formal schema and business validation"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.application.IdempotencyExecutor",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["server household", "server application"],
+      "thread": "blocking; starts its own transaction; caller supplies authenticated actor, canonical digest, work and replay authorization",
+      "members": ["IdempotencyExecutor(JdbcTemplate jdbc, PlatformTransactionManager transactionManager)", "Result execute(UUID actor, UUID key, byte[] digest, Supplier<Result> work, Consumer<Result> authorizeReplay)"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.application.IdempotencyExecutor.Result",
+      "kind": "value",
+      "owner": "EF/E",
+      "consumers": ["server household", "server application"],
+      "thread": "immutable",
+      "members": ["Result(int status, @Nullable String body)", "final int status", "@Nullable final String body"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.application.IdempotencyExecutor.KeyReused",
+      "kind": "exception",
+      "owner": "EF/E",
+      "consumers": ["server household", "server application"],
+      "thread": "any",
+      "members": ["KeyReused()"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.household.HouseholdWriteService",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["server household web"],
+      "thread": "blocking; authenticating caller derives digest server-side",
+      "members": ["HouseholdWriteService(JdbcTemplate jdbc, IdempotencyExecutor idempotency, JsonbCodec json, Clock clock)", "Result createHousehold(UUID actor, UUID key, byte[] digest, String requestedName)", "Result joinHousehold(UUID actor, UUID key, byte[] digest, String invitationCode)"],
+      "incomplete": ["invitation creation", "HTTP and security wiring", "public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.config.JsonbCodec",
+      "kind": "class",
+      "owner": "EF/E",
+      "consumers": ["server household", "server application", "server persistence"],
+      "thread": "any; ObjectMapper must not be reconfigured concurrently",
+      "members": ["JsonbCodec(ObjectMapper json)", "ObjectNode object()", "String write(JsonNode value)", "JsonNode read(String value)"]
+    },
+    {
+      "type": "edu.xjtlu.civa.server.household.HouseholdWriteService.Failure",
+      "kind": "exception",
+      "owner": "EF/E",
+      "consumers": ["server household web"],
+      "thread": "any",
+      "members": ["final String code"]
+    }
+  ]
+}

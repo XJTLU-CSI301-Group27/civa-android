@@ -26,6 +26,8 @@ secrets.properties
 *.log
 *.tmp
 *.bak
+__pycache__/
+*.pyc
 
 # Generated coverage and reports
 coverage/

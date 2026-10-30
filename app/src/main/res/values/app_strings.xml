@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Civa</string>
+    <string name="app_today">今天</string>
+    <string name="app_recipes">菜谱</string>
+    <string name="app_inventory">冰箱</string>
+    <string name="app_diary">食记</string>
+    <string name="app_profile">我的</string>
+    <string name="app_not_connected">功能待接入</string>
+    <string name="app_recipe_detail">菜谱详情</string>
+    <string name="app_recipe_edit">编辑菜谱</string>
+    <string name="app_inventory_edit">编辑库存</string>
+    <string name="app_plan">排餐</string>
+    <string name="app_cooking_confirm">确认做饭</string>
+    <string name="app_meal_edit">编辑食记</string>
+    <string name="app_login">登录</string>
+    <string name="app_household">家庭</string>
+    <string name="app_preferences">偏好</string>
+</resources>

@@ -1,0 +1,12 @@
+{
+  "library": "retrofit2",
+  "serializationLibrary": "gson",
+  "apiPackage": "edu.xjtlu.civa.api",
+  "modelPackage": "edu.xjtlu.civa.api.model",
+  "useRxJava": false,
+  "useRxJava2": false,
+  "useRxJava3": false,
+  "useBeanValidation": false,
+  "openApiNullable": false,
+  "hideGenerationTimestamp": true
+}

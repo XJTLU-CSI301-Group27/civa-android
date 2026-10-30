@@ -1,0 +1,46 @@
+plugins { id 'java-library' }
+java { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+
+// The single OpenAPI input remains a candidate until the team approves the baseline.
+def contractToolchain = new Properties()
+rootProject.file('contracts/toolchain.properties').withInputStream { contractToolchain.load(it) }
+configurations { contractGenerator }
+sourceSets {
+    main { java.srcDir layout.buildDirectory.dir('generated/openapi/src/main/java') }
+    contractCandidateTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations { contractCandidateTestImplementation.extendsFrom implementation, api }
+dependencies {
+    contractGenerator "org.openapitools:openapi-generator-cli:${contractToolchain.getProperty('openApiGeneratorVersion')}"
+    api libs.retrofit
+    implementation libs.okhttp
+    implementation libs.gson
+    implementation libs.jsr305
+    implementation libs.javax.annotation
+    contractCandidateTestImplementation libs.junit
+}
+tasks.register('generateClient', JavaExec) {
+    group = 'build'
+    description = 'Generate the client from the candidate OpenAPI contract.'
+    classpath = configurations.contractGenerator
+    mainClass = 'org.openapitools.codegen.OpenAPIGenerator'
+    inputs.files rootProject.file('contracts/openapi.json'), rootProject.file('contracts/generator-client.json')
+    outputs.dir layout.buildDirectory.dir('generated/openapi')
+    doFirst { delete layout.buildDirectory.dir('generated/openapi') }
+    args 'generate', '-g', 'java', '-i', rootProject.file('contracts/openapi.json').absolutePath,
+         '-c', rootProject.file('contracts/generator-client.json').absolutePath,
+         '-o', layout.buildDirectory.dir('generated/openapi').get().asFile.absolutePath,
+         '--global-property', 'apis,models,supportingFiles=CollectionFormats.java:StringUtil.java,apiTests=false,modelTests=false,apiDocs=false,modelDocs=false'
+}
+tasks.named('compileJava') { dependsOn 'generateClient' }
+tasks.register('testCandidateClient', Test) {
+    group = 'verification'
+    description = 'Compile and exercise generated client draft DTOs; not a production test.'
+    testClassesDirs = sourceSets.contractCandidateTest.output.classesDirs
+    classpath = sourceSets.contractCandidateTest.runtimeClasspath
+    inputs.dir rootProject.file('contracts/fixtures')
+    systemProperty 'civa.fixtures', rootProject.file('contracts/fixtures').absolutePath
+}

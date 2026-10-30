@@ -1,0 +1,11 @@
+plugins { alias(libs.plugins.android.library) }
+android {
+    namespace 'edu.xjtlu.civa.feature.ac'
+    compileSdk 36
+    resourcePrefix 'ac_'
+    defaultConfig { minSdk 26 }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    buildFeatures { viewBinding true }
+    lint { error 'ResourceName' }
+}
+dependencies { implementation project(':api-client'); implementation project(':core-ui'); implementation project(':core-data') }
