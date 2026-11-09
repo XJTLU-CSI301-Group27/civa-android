@@ -3,20 +3,21 @@
 # which requires a code owner review for these paths.
 #
 # Use real, resolvable accounts. Do not write a role placeholder such as "EF".
-# Two owners are listed on purpose: either one can approve a pull request opened by the
-# other, because GitHub never counts an author's own approval as a code owner review.
+# All four group members are owners so that any member can approve a pull request opened
+# by another: GitHub never counts an author's own approval as a code owner review, and a
+# single owner would be unable to merge their own change to these paths.
 
-/.github/                @DumbFoxxxxy @KLEIBER404
-/scripts/                @DumbFoxxxxy @KLEIBER404
-/contracts/              @DumbFoxxxxy @KLEIBER404
-/AGENTS.md               @DumbFoxxxxy @KLEIBER404
-/PROJECT_DOC.md          @DumbFoxxxxy @KLEIBER404
-/build.gradle            @DumbFoxxxxy @KLEIBER404
-/settings.gradle         @DumbFoxxxxy @KLEIBER404
-/gradle/                 @DumbFoxxxxy @KLEIBER404
-/gradlew                 @DumbFoxxxxy @KLEIBER404
-/gradlew.bat             @DumbFoxxxxy @KLEIBER404
-/server/build.gradle     @DumbFoxxxxy @KLEIBER404
-/server/settings.gradle  @DumbFoxxxxy @KLEIBER404
-/server/gradle/          @DumbFoxxxxy @KLEIBER404
-/server/gradle.lockfile  @DumbFoxxxxy @KLEIBER404
+/.github/                @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/scripts/                @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/contracts/              @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/AGENTS.md               @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/PROJECT_DOC.md          @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/build.gradle            @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/settings.gradle         @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/gradle/                 @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/gradlew                 @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/gradlew.bat             @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/server/build.gradle     @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/server/settings.gradle  @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/server/gradle/          @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/server/gradle.lockfile  @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY

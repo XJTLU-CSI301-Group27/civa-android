@@ -35,9 +35,12 @@ output and this document disagree, the API output is correct.
 together with "review from a code owner required"; it does not block merges by
 itself.
 
-Two accounts (`@DumbFoxxxxy`, `@KLEIBER404`) own every controlled path and either
-one can approve. This is deliberate: GitHub never counts an author's own
-approval, so a single owner could never merge their own change to these paths.
+All four members (`@DumbFoxxxxy`, `@KLEIBER404`, `@haorannii`, `@LYFFAY`) own every
+controlled path, and any one of them can approve. This is deliberate: GitHub never
+counts an author's own approval, so a single owner could never merge their own
+change to these paths. The team is a small group project, so the rule exists to
+guarantee that a second person has looked at a contract, CI or build change, not
+to reserve it for one role.
 
 Because `main` is protected, every change after the bootstrap commit goes
 through a pull request, including CI and documentation-only changes.
