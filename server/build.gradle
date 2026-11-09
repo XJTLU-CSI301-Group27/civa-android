@@ -1,0 +1,91 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+group = 'edu.xjtlu.civa'
+java { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+repositories { mavenCentral() }
+dependencyLocking { lockAllConfigurations() }
+tasks.named('processResources') {
+    from('../contracts/openapi.json') { into 'contracts' }
+}
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.30'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+tasks.register('verifyTestDatabase', JavaExec) {
+    group = 'verification'
+    description = 'Verify the configured PostgreSQL test database before tests can run.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'edu.xjtlu.civa.server.testing.TestDatabaseGuard'
+}
+tasks.named('test') {
+    dependsOn 'verifyTestDatabase'
+    inputs.file '../contracts/openapi.json'
+    systemProperty 'civa.contractDraft', file('../contracts/openapi.json').absolutePath
+    useJUnitPlatform()
+}
+tasks.register('unitTest', Test) {
+    group = 'verification'
+    description = 'Run explicitly listed isolated unit tests without starting a database.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include '**/CredentialsTest.class', '**/InvitationCodesTest.class', '**/CanonicalRequestDigestTest.class', '**/JsonbCodecTest.class', '**/TestDatabaseGuardUnitTest.class', '**/SafeFlywayTestConfigurationTest.class'
+    inputs.file '../contracts/openapi.json'
+    systemProperty 'civa.contractDraft', file('../contracts/openapi.json').absolutePath
+    useJUnitPlatform()
+}
+
+// The single OpenAPI input remains a candidate until the team approves the baseline.
+def contractToolchain = new Properties()
+file('../contracts/toolchain.properties').withInputStream { contractToolchain.load(it) }
+configurations { contractGenerator }
+sourceSets {
+    main { java.srcDir layout.buildDirectory.dir('generated/openapi/src/main/java') }
+    contractCandidateTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations {
+    contractCandidateTestImplementation.extendsFrom testImplementation, implementation
+    contractCandidateTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+dependencies {
+    contractGenerator "org.openapitools:openapi-generator-cli:${contractToolchain.getProperty('openApiGeneratorVersion')}"
+}
+tasks.register('generateServerApi', JavaExec) {
+    group = 'build'
+    description = 'Generate server interfaces from the candidate OpenAPI contract.'
+    classpath = configurations.contractGenerator
+    mainClass = 'org.openapitools.codegen.OpenAPIGenerator'
+    inputs.files '../contracts/openapi.json', '../contracts/generator-server.json', '../contracts/templates/server/beanValidation.mustache', '../contracts/templates/server/beanValidationCore.mustache'
+    outputs.dir layout.buildDirectory.dir('generated/openapi')
+    doFirst { delete layout.buildDirectory.dir('generated/openapi') }
+    args 'generate', '-g', 'spring', '-i', file('../contracts/openapi.json').absolutePath,
+         '-c', file('../contracts/generator-server.json').absolutePath,
+         '-t', file('../contracts/templates/server').absolutePath,
+         '-o', layout.buildDirectory.dir('generated/openapi').get().asFile.absolutePath,
+         '--global-property', 'apis,models,apiTests=false,modelTests=false,apiDocs=false,modelDocs=false'
+}
+tasks.named('compileJava') { dependsOn 'generateServerApi' }
+tasks.register('testCandidateContract', Test) {
+    group = 'verification'
+    description = 'Check generated draft DTO nullable behavior; not the production test suite.'
+    testClassesDirs = sourceSets.contractCandidateTest.output.classesDirs
+    classpath = sourceSets.contractCandidateTest.runtimeClasspath
+    inputs.files '../contracts/openapi.json', '../contracts/fixtures'
+    systemProperty 'civa.fixtures', file('../contracts/fixtures').absolutePath
+    systemProperty 'civa.contractDraft', file('../contracts/openapi.json').absolutePath
+    useJUnitPlatform()
+}

@@ -1,0 +1,20 @@
+plugins { alias(libs.plugins.android.library) }
+android {
+    namespace 'edu.xjtlu.civa.feature.ef'
+    compileSdk 36
+    resourcePrefix 'ef_'
+    defaultConfig { minSdk 26 }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    buildFeatures { viewBinding true }
+    lint { error 'ResourceName' }
+}
+dependencies {
+    implementation project(':api-client')
+    implementation project(':core-ui')
+    api project(':core-data')
+    implementation libs.fragment
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.lifecycle.viewmodel
+    implementation libs.lifecycle.livedata
+}

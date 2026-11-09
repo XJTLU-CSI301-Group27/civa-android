@@ -1,0 +1,55 @@
+plugins { alias(libs.plugins.android.application) }
+
+def configuredApiUrl = providers.gradleProperty('CIVA_API_BASE_URL').orNull
+def validateApiUrl = { String value, boolean release ->
+    if (value == null || value.isBlank()) return false
+    try {
+        def uri = new URI(value)
+        return (release ? uri.scheme == 'https' : uri.scheme in ['http', 'https']) && uri.host != null &&
+                uri.userInfo == null && uri.query == null && uri.fragment == null && uri.path == '/'
+    } catch (Exception ignored) { return false }
+}
+if (configuredApiUrl != null && !validateApiUrl(configuredApiUrl, false)) {
+    throw new GradleException('CIVA_API_BASE_URL must be an HTTP(S) origin ending in /, without credentials, query or fragment.')
+}
+
+android {
+    namespace 'edu.xjtlu.civa'
+    compileSdk 36
+    resourcePrefix 'app_'
+    defaultConfig { applicationId 'edu.xjtlu.civa'; minSdk 26; targetSdk 36 }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    buildFeatures { viewBinding true; buildConfig true }
+    buildTypes {
+        debug { buildConfigField 'String', 'API_BASE_URL', groovy.json.JsonOutput.toJson(configuredApiUrl ?: 'http://10.0.2.2:8080/') }
+        release { buildConfigField 'String', 'API_BASE_URL', groovy.json.JsonOutput.toJson(configuredApiUrl ?: 'https://invalid.invalid/') }
+    }
+    lint { error 'ResourceName' }
+    testOptions { unitTests.all { systemProperty 'civa.publicSurface', rootProject.file('contracts/public-surface.draft.json').absolutePath } }
+}
+
+def verifyReleaseApiUrl = tasks.register('verifyReleaseApiUrl') {
+    doLast {
+        if (!validateApiUrl(configuredApiUrl, true)) throw new GradleException('Release requires an explicit HTTPS CIVA_API_BASE_URL ending in /.')
+    }
+}
+tasks.configureEach { task ->
+    if (task.name.toLowerCase(Locale.ROOT).contains('release') && task.name != 'verifyReleaseApiUrl') {
+        task.dependsOn verifyReleaseApiUrl
+    }
+}
+dependencies {
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.fragment
+    implementation libs.lifecycle.livedata
+    implementation project(':api-client')
+    implementation project(':core-ui')
+    implementation project(':core-data')
+    implementation project(':feature-ac')
+    implementation project(':feature-bd')
+    implementation project(':feature-ef')
+    testImplementation libs.junit
+    testImplementation libs.archunit
+    testImplementation libs.gson
+}

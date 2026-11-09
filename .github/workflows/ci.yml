@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  contracts:
+    name: Contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install contract tooling
+        run: python -m pip install -r scripts/requirements.txt
+      - name: Contract tool self-tests
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: Validate, generate, and check contracts
+        run: ./gradlew validateContract generateClient generateServerApi checkContracts --no-daemon
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Assemble, unit test, and lint
+        run: ./gradlew assembleDebug testDebugUnitTest lint --no-daemon
+
+  server:
+    name: Server
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: civa_test
+          POSTGRES_USER: civa
+          POSTGRES_PASSWORD: civa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U civa"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Server integration tests and bootJar
+        working-directory: server
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/civa_test
+          DB_USERNAME: civa
+          DB_PASSWORD: civa
+        run: ./gradlew test bootJar --no-daemon
+
+  gate:
+    name: CI gate
+    if: always()
+    needs: [contracts, android, server]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every required job to succeed
+        env:
+          CONTRACTS: ${{ needs.contracts.result }}
+          ANDROID: ${{ needs.android.result }}
+          SERVER: ${{ needs.server.result }}
+        run: |
+          echo "contracts=$CONTRACTS android=$ANDROID server=$SERVER"
+          failed=0
+          for result in "$CONTRACTS" "$ANDROID" "$SERVER"; do
+            if [ "$result" != "success" ]; then
+              echo "::error::A required job did not succeed: $result"
+              failed=1
+            fi
+          done
+          exit "$failed"

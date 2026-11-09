@@ -1,5 +1,9 @@
 # Civa Android Mandatory AI Development Rules
 
+For the architecture initialization, also read `PROJECT_DOC.md` and
+`OPEN_QUESTIONS.md`. Generated code must not be edited by hand; public contract
+proposals follow the review process in the existing team rules.
+
 ## 1. Read project rules first
 
 Before modifying code, read:

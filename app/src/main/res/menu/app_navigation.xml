@@ -1,0 +1,7 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/app_today" android:icon="@android:drawable/ic_menu_today" android:title="@string/app_today" />
+    <item android:id="@+id/app_recipes" android:icon="@android:drawable/ic_menu_search" android:title="@string/app_recipes" />
+    <item android:id="@+id/app_inventory" android:icon="@android:drawable/ic_menu_gallery" android:title="@string/app_inventory" />
+    <item android:id="@+id/app_diary" android:icon="@android:drawable/ic_menu_edit" android:title="@string/app_diary" />
+    <item android:id="@+id/app_profile" android:icon="@android:drawable/ic_menu_manage" android:title="@string/app_profile" />
+</menu>

@@ -1,0 +1,11 @@
+<resources>
+    <!-- 前端主题内容留白：仅挂到 Material 默认主题，颜色绑定 civa_colors 的中性占位，待团队确认视觉系统后替换。 -->
+    <style name="CivaTheme.Civa" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/civa_primary</item>
+        <item name="colorPrimaryVariant">@color/civa_primary_dark</item>
+        <item name="colorSecondary">@color/civa_secondary</item>
+        <item name="android:windowBackground">@color/civa_background</item>
+        <item name="android:statusBarColor">@color/civa_primary_dark</item>
+        <item name="android:navigationBarColor">@color/civa_primary_dark</item>
+    </style>
+</resources>

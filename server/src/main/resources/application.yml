@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+      fail-on-trailing-tokens: true
+    parser:
+      strict-duplicate-detection: true
+  flyway:
+    clean-disabled: true
+    out-of-order: false
+server:
+  port: ${SERVER_PORT:8080}
+civa:
+  media-dir: ${CIVA_MEDIA_DIR}

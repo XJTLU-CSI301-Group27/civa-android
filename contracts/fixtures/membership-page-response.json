@@ -1,0 +1,17 @@
+{
+  "items": [
+    {
+      "id": "9e0dd3fb-30d6-4df5-b495-fd067610db79",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "householdId": "8e0dd3fb-30d6-4df5-b495-fd067610db79",
+      "userId": "7e0dd3fb-30d6-4df5-b495-fd067610db79",
+      "role": "OWNER",
+      "active": true,
+      "version": 1
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "total": 1
+}

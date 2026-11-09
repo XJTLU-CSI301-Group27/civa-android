@@ -1,0 +1,29 @@
+<resources>
+    <string name="ef_welcome">一起吃好每一天</string>
+    <string name="ef_welcome_detail">登录后与家人共享菜谱、冰箱和餐桌计划。</string>
+    <string name="ef_username">用户名</string>
+    <string name="ef_display_name">显示名称</string>
+    <string name="ef_password">密码</string>
+    <string name="ef_login">登录</string>
+    <string name="ef_register">创建账号</string>
+    <string name="ef_to_register">还没有账号？创建账号</string>
+    <string name="ef_to_login">已有账号？返回登录</string>
+    <string name="ef_busy">正在处理…</string>
+    <string name="ef_registered">账号已创建，请登录。</string>
+    <string name="ef_invalid_credentials">用户名或密码不正确。</string>
+    <string name="ef_username_taken">用户名已被使用。</string>
+    <string name="ef_invalid_input">请检查输入的信息。</string>
+    <string name="ef_rate_limited">尝试次数过多，请稍后再试。</string>
+    <string name="ef_network_error">无法连接服务，请检查网络后重试。</string>
+    <string name="ef_generic_error">请求未完成，请稍后重试。</string>
+    <string name="ef_household_title">家庭</string>
+    <string name="ef_household_detail">创建或加入一个家庭，与家人共享菜谱和冰箱。</string>
+    <string name="ef_create_household">创建家庭</string>
+    <string name="ef_household_name">家庭名称</string>
+    <string name="ef_join_household">加入家庭</string>
+    <string name="ef_household_code">邀请码</string>
+    <string name="ef_already_in_household">你已经在一个家庭中。</string>
+    <string name="ef_invalid_invitation">邀请码无效或已过期。</string>
+    <string name="ef_recovered">检测到未确认的家庭操作，已恢复；可重试或放弃。放弃不等于服务端已回滚。</string>
+    <string name="ef_abandon">放弃上次操作</string>
+</resources>
