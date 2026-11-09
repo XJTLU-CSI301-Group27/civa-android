@@ -86,6 +86,12 @@ running `_test` PostgreSQL database and are run separately.
 
 ## Building and running locally
 
+Windows teammates: [另一台电脑快速测试](docs/QUICK_START.md). The repository-root
+`start-civa.bat` detects local tools; use `-CheckOnly`, `-Stop`, `-BuildServer`,
+`-BuildApp`, or `-NoStudio` as needed. No developer-specific drive paths are required.
+
+Windows local debugging and developer handoff: [本地调试与运行交接](docs/LOCAL_RUN_HANDOFF.md).
+
 Prerequisites: JDK 17, Android SDK with platform 36, Python 3.11+, and either
 Docker Compose or a local PostgreSQL 16 instance. The debug app defaults to
 `http://10.0.2.2:8080/` (the emulator's route to the host).
