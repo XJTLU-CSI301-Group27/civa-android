@@ -35,12 +35,12 @@ output and this document disagree, the API output is correct.
 together with "review from a code owner required"; it does not block merges by
 itself.
 
-All four members (`@DumbFoxxxxy`, `@KLEIBER404`, `@haorannii`, `@LYFFAY`) own every
-controlled path, and any one of them can approve. This is deliberate: GitHub never
-counts an author's own approval, so a single owner could never merge their own
-change to these paths. The team is a small group project, so the rule exists to
-guarantee that a second person has looked at a contract, CI or build change, not
-to reserve it for one role.
+All five members (`@DumbFoxxxxy`, `@KLEIBER404`, `@haorannii`, `@LYFFAY`,
+`@YYY666X`) own every controlled path, and any one of them can approve. This is
+deliberate: GitHub never counts an author's own approval, so a single owner could
+never merge their own change to these paths. The team is a small group project,
+so the rule exists to guarantee that a second person has looked at a contract, CI
+or build change, not to reserve it for one role.
 
 Because `main` is protected, every change after the bootstrap commit goes
 through a pull request, including CI and documentation-only changes.
@@ -119,15 +119,16 @@ any further visibility change here before making it.
 
 ## Known gaps
 
-- **Organization default repository permission is `admin`**, so all four members
+- **Organization default repository permission is `admin`**, so all five members
   are administrators on this repository and can edit or delete the ruleset. The
   ruleset stops accidental force pushes and untested merges; it does not stop a
   determined administrator. Setting the organization default to `write` and
   granting admin only where needed would close this.
 - **No organization teams exist**, so `.github/CODEOWNERS` names an account
   rather than a team. Creating an `ef` team later means editing CODEOWNERS only.
-- **Enforcement is verified through the API, not through a rejected pull
-  request.** The first real proof is a pull request that has not passed `CI gate`
-  and cannot be merged.
+- **Enforcement was proven by pull request #6**: an empty-commit pull request was
+  refused with `BLOCKED` / `REVIEW_REQUIRED` and `the base branch policy prohibits
+  the merge`. It was closed without merging. Re-check after any plan or ruleset
+  change.
 - The organization Project is not yet on the recommended-template list (manual
   organization setting above).

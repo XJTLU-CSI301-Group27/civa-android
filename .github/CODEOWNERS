@@ -3,21 +3,21 @@
 # which requires a code owner review for these paths.
 #
 # Use real, resolvable accounts. Do not write a role placeholder such as "EF".
-# All four group members are owners so that any member can approve a pull request opened
-# by another: GitHub never counts an author's own approval as a code owner review, and a
+# Every group member is an owner so that any member can approve a pull request opened by
+# another: GitHub never counts an author's own approval as a code owner review, and a
 # single owner would be unable to merge their own change to these paths.
 
-/.github/                @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/scripts/                @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/contracts/              @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/AGENTS.md               @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/PROJECT_DOC.md          @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/build.gradle            @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/settings.gradle         @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/gradle/                 @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/gradlew                 @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/gradlew.bat             @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/server/build.gradle     @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/server/settings.gradle  @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/server/gradle/          @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
-/server/gradle.lockfile  @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY
+/.github/                @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/scripts/                @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/contracts/              @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/AGENTS.md               @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/PROJECT_DOC.md          @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/build.gradle            @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/settings.gradle         @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/gradle/                 @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/gradlew                 @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/gradlew.bat             @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/server/build.gradle     @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/server/settings.gradle  @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/server/gradle/          @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
+/server/gradle.lockfile  @DumbFoxxxxy @KLEIBER404 @haorannii @LYFFAY @YYY666X
