@@ -1,0 +1,8 @@
+// Optional local workaround when Maven Central rejects the network's proxy IP.
+settingsEvaluated { settings ->
+    settings.dependencyResolutionManagement.repositories.each { repository ->
+        if (repository.hasProperty('url') && repository.url.host == 'repo.maven.apache.org') {
+            repository.setUrl('https://maven.aliyun.com/repository/central')
+        }
+    }
+}

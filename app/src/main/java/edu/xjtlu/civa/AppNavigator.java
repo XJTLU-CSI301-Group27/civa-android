@@ -34,7 +34,8 @@ final class AppNavigator implements NavHost {
             case PREFERENCES: title = R.string.app_preferences; break;
             default: throw new IllegalArgumentException("Unknown route: " + route);
         }
-        if (primary) fragments.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        // Queue the pop with the replacement; onResume callbacks can navigate during a pop.
+        if (primary) fragments.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         var fragment = route == Route.LOGIN ? new LoginFragment()
                 : route == Route.HOUSEHOLD ? new HouseholdFragment()
                 : PlaceholderFragment.create(title, entityId);
