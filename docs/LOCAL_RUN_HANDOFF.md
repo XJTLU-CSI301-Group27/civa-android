@@ -221,6 +221,12 @@ SHA-1：2d857d170c0d1b827149565da34b3383e5306f7f
 
 IDE 原始日志位于本机 `%LOCALAPPDATA%\Google\AndroidStudio2026.2.1\log\idea.log`。IDE 旧的普通 Java 模块 `CivaLocal.iml` 注册已从本机 `.idea/modules.xml` 移除；Android 模块仍由 Gradle 导入管理，未删除项目源码。当前运行配置为 `app`，目标设备为 `Civa API 35`。
 
+推送前已整合远端 main `3193679`，保留其 CI gate、CODEOWNERS 和 PR 模板。执行 `validateContract generateClient generateServerApi checkContracts assembleDebug testDebugUnitTest lint --no-daemon` 成功；Python 脚本 17 项及 PowerShell 启动器自检成功。后端 `test unitTest bootJar` 对独立的临时 PostgreSQL `civa_test` 执行成功，Gradle 部分任务复用了已有结果；测试报告记录 16 项集成测试、8 项单元测试，无失败。临时测试容器已清理，开发数据库保留。
+
+完整 `scripts/preflight.ps1` 在本机 Python 3.10.9 环境因版本门槛停止，**未宣称完整预检通过，也未降低 Python 3.11 要求**。上述任务分别执行；远端 CI 使用 Python 3.11，结果需在 PR 中查看。
+
+本次导航验证的真实截图：[竖屏/底部导航](verification/screenshots/civa-portrait.png)、[横屏/侧边导航](verification/screenshots/civa-landscape.png)。截图中的“功能待接入”为当前实际状态；截图不表示业务功能已完成，拍摄后已恢复原旋转设置。
+
 ### 重跑设备回归
 
 保持开发后端和数据库运行，安装最新 debug APK，并等待模拟器完全启动：
