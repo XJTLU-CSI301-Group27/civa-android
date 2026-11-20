@@ -1,6 +1,8 @@
 package edu.xjtlu.civa.server.planning;
 
 import edu.xjtlu.civa.server.api.model.*;
+import edu.xjtlu.civa.server.household.HouseholdAccess;
+import edu.xjtlu.civa.server.web.Paging;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
@@ -13,27 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PlanningService {
   private final JdbcTemplate jdbc;
+  private final HouseholdAccess access;
   private static final DateTimeFormatter TIME =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
-  public PlanningService(JdbcTemplate jdbc) {
+  public PlanningService(JdbcTemplate jdbc, HouseholdAccess access) {
     this.jdbc = jdbc;
+    this.access = access;
   }
 
   /** Membership is rechecked on every request, including idempotent replay. */
   public void requireMember(UUID actor, UUID home, boolean lock) {
-    if (lock)
-      jdbc.query(
-          "SELECT id FROM households WHERE id=? FOR UPDATE", (rs, n) -> rs.getObject(1), home);
-    List<Boolean> rows =
-        jdbc.query(
-            "SELECT active FROM memberships WHERE user_id=? AND household_id=? ORDER BY active DESC"
-                + " LIMIT 1",
-            (rs, n) -> rs.getBoolean(1),
-            actor,
-            home);
-    if (rows.isEmpty()) throw new BdRules.Failure("NOT_FOUND");
-    if (!rows.get(0)) throw new BdRules.Failure("HOUSEHOLD_ACCESS_REVOKED");
+    access.requireMember(actor, home, lock);
   }
 
   @Transactional(readOnly = true)
@@ -199,7 +192,6 @@ public class PlanningService {
   }
 
   public static void pagination(int page, int size) {
-    if (page < 0 || size < 1 || size > 100)
-      throw new IllegalArgumentException("Invalid pagination");
+    Paging.check(page, size);
   }
 }

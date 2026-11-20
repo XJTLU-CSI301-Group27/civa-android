@@ -1,15 +1,14 @@
 package edu.xjtlu.civa.server.planning;
 
+import edu.xjtlu.civa.server.web.ApiFailure;
+import edu.xjtlu.civa.server.web.WireNumbers;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
 /** Shared BD validation; wire quantities are decimal strings, never floating point. */
 public final class BdRules {
-  private static final BigDecimal MAX = new BigDecimal("999999999999999.999");
-
   private BdRules() {}
 
   public static LocalDate date(String value) {
@@ -37,10 +36,7 @@ public final class BdRules {
   }
 
   public static String number(BigDecimal value) {
-    BigDecimal rounded = value.setScale(3, RoundingMode.HALF_UP);
-    if (rounded.signum() < 0 || rounded.compareTo(MAX) > 0)
-      throw new IllegalArgumentException("Quantity overflow");
-    return rounded.stripTrailingZeros().toPlainString();
+    return WireNumbers.number(value);
   }
 
   public static String calories(String basis, String amount, String kcal) {
@@ -62,12 +58,9 @@ public final class BdRules {
     };
   }
 
-  public static final class Failure extends RuntimeException {
-    public final String code;
-
+  public static final class Failure extends ApiFailure {
     public Failure(String code) {
       super(code);
-      this.code = code;
     }
   }
 }

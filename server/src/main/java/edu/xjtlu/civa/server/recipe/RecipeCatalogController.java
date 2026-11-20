@@ -3,8 +3,10 @@ package edu.xjtlu.civa.server.recipe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.xjtlu.civa.server.api.RecipeApi;
 import edu.xjtlu.civa.server.api.model.*;
-import edu.xjtlu.civa.server.planning.BdRules;
-import edu.xjtlu.civa.server.planning.PlanningService;
+import edu.xjtlu.civa.server.household.HouseholdAccess;
+import edu.xjtlu.civa.server.web.ApiFailure;
+import edu.xjtlu.civa.server.web.Paging;
+import edu.xjtlu.civa.server.web.WireNumbers;
 import java.sql.*;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -14,16 +16,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Minimal shared catalog read adapter for BD MVP. AC can extend this single route owner. */
+/** Minimal shared catalog read adapter. AC owns this route: extend it, never add a second one. */
 @RestController
 class RecipeCatalogController implements RecipeApi {
   private final JdbcTemplate jdbc;
-  private final PlanningService access;
+  private final HouseholdAccess access;
   private final ObjectMapper json;
   private static final DateTimeFormatter TIME =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
-  RecipeCatalogController(JdbcTemplate jdbc, PlanningService access, ObjectMapper json) {
+  RecipeCatalogController(JdbcTemplate jdbc, HouseholdAccess access, ObjectMapper json) {
     this.jdbc = jdbc;
     this.access = access;
     this.json = json;
@@ -39,7 +41,7 @@ class RecipeCatalogController implements RecipeApi {
       Integer page,
       Integer size) {
     access.requireMember(actor(), home, false);
-    PlanningService.pagination(page, size);
+    Paging.check(page, size);
     List<Object> params = new ArrayList<>();
     params.add(home);
     params.add(Boolean.TRUE.equals(archived));
@@ -77,13 +79,13 @@ class RecipeCatalogController implements RecipeApi {
     access.requireMember(actor(), home, false);
     List<Recipe> values =
         jdbc.query("SELECT * FROM recipes WHERE id=? AND household_id=?", this::map, id, home);
-    if (values.isEmpty()) throw new BdRules.Failure("NOT_FOUND");
+    if (values.isEmpty()) throw new ApiFailure("NOT_FOUND");
     return ResponseEntity.ok(values.get(0));
   }
 
   @Override
   public ResponseEntity<RecipePage> listWishlist(Integer page, Integer size) {
-    PlanningService.pagination(page, size);
+    Paging.check(page, size);
     UUID actor = actor();
     String where =
         " FROM recipes r JOIN wishlists w ON w.recipe_id=r.id AND w.user_id=? JOIN memberships m ON"
@@ -107,7 +109,7 @@ class RecipeCatalogController implements RecipeApi {
             (r, n) ->
                 new RecipeIngredient()
                     .ingredientId(r.getObject("ingredient_id", UUID.class))
-                    .quantity(BdRules.number(r.getBigDecimal("quantity")))
+                    .quantity(WireNumbers.number(r.getBigDecimal("quantity")))
                     .unit(Unit.fromValue(r.getString("unit")))
                     .trackStock(r.getBoolean("track_stock")),
             id);
@@ -127,14 +129,14 @@ class RecipeCatalogController implements RecipeApi {
                   rs.getString("steps"),
                   json.getTypeFactory().constructCollectionType(List.class, String.class)))
           .ingredients(ingredients)
-          .yieldServings(BdRules.number(rs.getBigDecimal("yield_servings")))
+          .yieldServings(WireNumbers.number(rs.getBigDecimal("yield_servings")))
           .durationMinutes(rs.getInt("duration_minutes"))
           .tags(new LinkedHashSet<>(tagValues))
           .imageId(rs.getObject("image_id", UUID.class))
           .totalKcal(
               rs.getBigDecimal("total_kcal") == null
                   ? null
-                  : BdRules.number(rs.getBigDecimal("total_kcal")))
+                  : WireNumbers.number(rs.getBigDecimal("total_kcal")))
           .archived(rs.getBoolean("archived"))
           .version(rs.getLong("version"));
     } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
@@ -167,8 +169,8 @@ class RecipeCatalogController implements RecipeApi {
     throw unavailable();
   }
 
-  private static BdRules.Failure unavailable() {
-    return new BdRules.Failure("CONTRACT_NOT_IMPLEMENTED");
+  private static ApiFailure unavailable() {
+    return new ApiFailure("CONTRACT_NOT_IMPLEMENTED");
   }
 
   private static UUID actor() {
