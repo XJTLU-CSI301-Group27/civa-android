@@ -1,0 +1,148 @@
+{
+  "source": "Anduin2017/HowToCook",
+  "license": "Unlicense",
+  "fetchedAt": "2026-11-20",
+  "note": "One planning portion per recipe; quantities and calories are not normalized. All imported ingredients are untracked; consult preserved source for actual amounts.",
+  "recipes": [
+    {
+      "name": "西红柿炒鸡蛋",
+      "path": "dishes/vegetable_dish/西红柿炒鸡蛋.md",
+      "sourceUrl": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/vegetable_dish/%E8%A5%BF%E7%BA%A2%E6%9F%BF%E7%82%92%E9%B8%A1%E8%9B%8B.md",
+      "sourceSha256": "6ef54c60c7701866ba212e3e7cbc19a2d84c109e142824084d1f467dc701dc2f",
+      "file": "西红柿炒鸡蛋.txt",
+      "durationMinutes": 15,
+      "yieldServings": "1",
+      "totalKcal": null,
+      "tags": [
+        "酸甜",
+        "家常"
+      ],
+      "ingredients": [
+        "西红柿",
+        "鸡蛋",
+        "食用油",
+        "盐",
+        "白砂糖",
+        "葱"
+      ]
+    },
+    {
+      "name": "酸辣土豆丝",
+      "path": "dishes/vegetable_dish/酸辣土豆丝.md",
+      "sourceUrl": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/vegetable_dish/%E9%85%B8%E8%BE%A3%E5%9C%9F%E8%B1%86%E4%B8%9D.md",
+      "sourceSha256": "c6bf903ae1c79e1089f32bffb79a14dd4d2bea58d1a2f90330f164b0b4f3f3cb",
+      "file": "酸辣土豆丝.txt",
+      "durationMinutes": 20,
+      "yieldServings": "1",
+      "totalKcal": null,
+      "tags": [
+        "酸辣",
+        "家常"
+      ],
+      "ingredients": [
+        "土豆",
+        "大蒜",
+        "青椒",
+        "红椒",
+        "干辣椒",
+        "葱",
+        "生抽",
+        "陈醋",
+        "盐",
+        "食用油"
+      ]
+    },
+    {
+      "name": "可乐鸡翅",
+      "path": "dishes/meat_dish/可乐鸡翅.md",
+      "sourceUrl": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/meat_dish/%E5%8F%AF%E4%B9%90%E9%B8%A1%E7%BF%85.md",
+      "sourceSha256": "1e4b0a32130955be99a966467200076a985b0bd031e2853e0879991ec961aaf0",
+      "file": "可乐鸡翅.txt",
+      "durationMinutes": 40,
+      "yieldServings": "1",
+      "totalKcal": null,
+      "tags": [
+        "咸甜",
+        "荤菜"
+      ],
+      "ingredients": [
+        "鸡翅中",
+        "可乐",
+        "白砂糖",
+        "生抽",
+        "老抽",
+        "盐",
+        "生姜",
+        "料酒",
+        "葱",
+        "食用油"
+      ]
+    },
+    {
+      "name": "鸡蛋羹",
+      "path": "dishes/vegetable_dish/鸡蛋羹/鸡蛋羹.md",
+      "sourceUrl": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/vegetable_dish/%E9%B8%A1%E8%9B%8B%E7%BE%B9/%E9%B8%A1%E8%9B%8B%E7%BE%B9.md",
+      "sourceSha256": "315fa22701bdabd3a35de3546f3f3a08fe325ff75b5dc70c1f519d5e8254d248",
+      "file": "鸡蛋羹.txt",
+      "durationMinutes": 15,
+      "yieldServings": "1",
+      "totalKcal": null,
+      "tags": [
+        "清淡",
+        "蒸菜"
+      ],
+      "ingredients": [
+        "鸡蛋",
+        "盐",
+        "香油",
+        "生抽",
+        "白醋",
+        "藤椒油"
+      ]
+    },
+    {
+      "name": "蛋炒饭",
+      "path": "dishes/staple/蛋炒饭.md",
+      "sourceUrl": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/staple/%E8%9B%8B%E7%82%92%E9%A5%AD.md",
+      "sourceSha256": "4b061d24b4e8c6a3dd3791f84de5303b3ff38ab41f8560c5226d76a3e56554e1",
+      "file": "蛋炒饭.txt",
+      "durationMinutes": 25,
+      "yieldServings": "1",
+      "totalKcal": null,
+      "tags": [
+        "咸香",
+        "主食"
+      ],
+      "ingredients": [
+        "米饭",
+        "鸡蛋",
+        "火腿",
+        "黄瓜",
+        "胡萝卜",
+        "食用油",
+        "盐",
+        "胡椒粉",
+        "生抽",
+        "葱"
+      ]
+    },
+    {
+      "name": "糖拌西红柿",
+      "path": "dishes/vegetable_dish/糖拌西红柿/糖拌西红柿.md",
+      "sourceUrl": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/vegetable_dish/%E7%B3%96%E6%8B%8C%E8%A5%BF%E7%BA%A2%E6%9F%BF/%E7%B3%96%E6%8B%8C%E8%A5%BF%E7%BA%A2%E6%9F%BF.md",
+      "sourceSha256": "0a17cd82ca74f182fdd543842535beac063179b47bfdf55135f76b8a1101f822",
+      "file": "糖拌西红柿.txt",
+      "durationMinutes": 15,
+      "yieldServings": "1",
+      "totalKcal": null,
+      "tags": [
+        "酸甜",
+        "凉菜"
+      ],
+      "ingredients": [
+        "西红柿",
+        "白砂糖"
+      ]
+    }
+  ]
+}

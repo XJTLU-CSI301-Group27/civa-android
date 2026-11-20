@@ -12,8 +12,9 @@ import edu.xjtlu.civa.core.data.SessionStore;
 import edu.xjtlu.civa.feature.ef.HouseholdHost;
 import edu.xjtlu.civa.feature.ef.LoginFragment;
 import edu.xjtlu.civa.feature.ef.LoginHost;
+import edu.xjtlu.civa.feature.bd.BdHost;
 
-public class MainActivity extends AppCompatActivity implements LoginHost, HouseholdHost {
+public class MainActivity extends AppCompatActivity implements LoginHost, HouseholdHost, BdHost {
     private AppContainer container;
     private AppNavigator navigator;
     private NavigationBarView navigation;
@@ -66,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements LoginHost, Househ
     @Override public ApiCalls calls() { return container.calls; }
 
     @Override public SessionStore sessions() { return container.sessions; }
+
+    @Override public void navigate(Route route, String entityId) { navigator.navigate(route, entityId); }
 
     @Override public void onHouseholdReady() {
         if (!container.sessions.isLoggedIn() || getSupportFragmentManager().isStateSaved()) return;

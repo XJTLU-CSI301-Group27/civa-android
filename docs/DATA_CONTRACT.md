@@ -2,6 +2,13 @@
 
 Status: Draft
 
+2026-11-20 BD MVP implementation note: the existing OpenAPI remains unchanged.
+New Android entry symbols, navigation reference syntax, a minimal shared recipe
+read adapter, and the additive starter dictionary/import are proposed in
+`contracts/changes/IC-20261120-BD-01.md`. This does not approve the baseline or
+record EF acceptance. Implementation, scope reductions, source attribution,
+actual validation and integration steps are maintained in `docs/BD_HANDOFF.md`.
+
 This document is the source of truth for cross-group data. The team must agree on
 the final storage representation before implementation. Public contracts must
 not be changed silently.
