@@ -148,3 +148,11 @@ Windows 首次 lint 发现 local.properties 的 sdk.dir 转义不正确，修正
 - 热量界面、照片、库存匹配、复杂偏好推荐后置。未知热量没有按零处理。
 - 普通页面旋转由 ViewModel 保留状态；尚未承诺进程被系统杀死后恢复全部编辑草稿。弹窗中的未确认输入也不保证恢复。
 - 本地验证通过不代表远端 CI 通过。提交 feature 分支供 AC/EF 审阅，不直接合并 main；公共接口和食材字典变更仍为 PROPOSED。
+
+## GitHub 交付
+
+2026-11-20：实现提交 4d418ad 已推送到 feature/bd-planning-records。
+草稿 PR：https://github.com/XJTLU-CSI301-Group27/civa-android/pull/10 。
+main 未被合并或覆盖；请 AC/EF 在 PR 中核对 IC、菜谱控制器和食材字典后再按小组流程合并。远端 CI 状态以 PR 实时显示为准。
+
+本机可用 Android Studio 打开当前项目，安装 app/build/outputs/apk/debug/app-debug.apk；演示后端已更新为最终通过测试的 JAR。其他电脑不要复制本机忽略目录内的账号、数据库和绝对路径，应按仓库启动说明建立自己的环境，并在已有家庭下显式导入菜谱。
