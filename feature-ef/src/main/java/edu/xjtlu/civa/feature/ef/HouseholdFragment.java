@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import edu.xjtlu.civa.core.data.AppServices;
 import edu.xjtlu.civa.feature.ef.databinding.EfFragmentHouseholdBinding;
 import java.util.function.Consumer;
 
@@ -20,11 +21,11 @@ public final class HouseholdFragment extends Fragment {
 
     @Override public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
         super.onViewCreated(view, state);
-        HouseholdHost host = (HouseholdHost) requireActivity();
+        AppServices services = (AppServices) requireActivity();
         model = new ViewModelProvider(this, new ViewModelProvider.Factory() {
             @NonNull @Override public <T extends ViewModel> T create(@NonNull Class<T> type) {
                 if (type != HouseholdViewModel.class) throw new IllegalArgumentException("Unknown ViewModel");
-                return type.cast(new HouseholdViewModel(host.api(), host.calls(), host.authRepository(), host.sessions()));
+                return type.cast(new HouseholdViewModel(services.api(), services.calls(), services.auth(), services.sessions()));
             }
         }).get(HouseholdViewModel.class);
         binding = EfFragmentHouseholdBinding.bind(view);
@@ -57,13 +58,13 @@ public final class HouseholdFragment extends Fragment {
             if (value != null && !value.isEmpty()) binding.efHouseholdMessage.setText(messageResource(value));
         });
         model.ready.observe(getViewLifecycleOwner(), value -> {
-            if (Boolean.TRUE.equals(value) && isResumed()) host.onHouseholdReady();
+            if (Boolean.TRUE.equals(value) && isResumed()) ((HouseholdCallbacks) requireActivity()).onHouseholdReady();
         });
     }
 
     @Override public void onResume() {
         super.onResume();
-        if (model != null && Boolean.TRUE.equals(model.ready.getValue())) ((HouseholdHost) requireActivity()).onHouseholdReady();
+        if (model != null && Boolean.TRUE.equals(model.ready.getValue())) ((HouseholdCallbacks) requireActivity()).onHouseholdReady();
     }
 
     @Override public void onDestroyView() { binding = null; super.onDestroyView(); }

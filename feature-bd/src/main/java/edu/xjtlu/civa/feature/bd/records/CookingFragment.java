@@ -6,12 +6,14 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.*;
 import edu.xjtlu.civa.api.model.*;
+import edu.xjtlu.civa.core.data.AppServices;
+import edu.xjtlu.civa.core.ui.CivaScreen;
 import edu.xjtlu.civa.core.ui.Route;
 import edu.xjtlu.civa.feature.bd.*;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public final class CookingFragment extends BdScreen {
+public final class CookingFragment extends CivaScreen<AppServices> {
   private CookingViewModel model;
 
   public CookingFragment() {}
@@ -56,9 +58,9 @@ public final class CookingFragment extends BdScreen {
   private void render() {
     if (binding == null) return;
     title("确认这次做饭", "做饭属于家庭记录，吃饭由每个人另行确认", model.message);
-    button(binding.bdActions, "返回计划", true, () -> host.navigate(Route.PLAN, null));
-    button(binding.bdActions, "我的食记", true, () -> host.navigate(Route.DIARY, null));
-    LinearLayout form = card(binding.bdPrimary, "实际制作份数");
+    button(binding.civaActions, "返回计划", true, () -> host.navigate(Route.PLAN, null));
+    button(binding.civaActions, "我的食记", true, () -> host.navigate(Route.DIARY, null));
+    LinearLayout form = card(binding.civaPrimary, "实际制作份数");
     label(form, model.recipeId == null ? "请先选择菜谱" : "菜谱 " + model.recipeId, 14);
     EditText servings =
         input(
@@ -92,7 +94,7 @@ public final class CookingFragment extends BdScreen {
             notice("请输入大于零、最多三位小数的份数");
           }
         });
-    LinearLayout allocation = card(binding.bdSecondary, "食材分配与库存检查");
+    LinearLayout allocation = card(binding.civaSecondary, "食材分配与库存检查");
     if (model.preview == null)
       label(allocation, "先读取服务端预览，再确认实际使用的食材。AC 库存服务和 EF 事务协调器未接入时会显示明确错误。", 15);
     else {

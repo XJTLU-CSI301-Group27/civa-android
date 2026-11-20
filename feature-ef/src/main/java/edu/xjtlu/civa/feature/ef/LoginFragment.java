@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import edu.xjtlu.civa.core.data.AppServices;
 import edu.xjtlu.civa.feature.ef.databinding.EfFragmentLoginBinding;
 import java.util.function.Consumer;
 
@@ -20,11 +21,11 @@ public final class LoginFragment extends Fragment {
 
     @Override public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
         super.onViewCreated(view, state);
-        LoginHost host = (LoginHost) requireActivity();
+        AppServices services = (AppServices) requireActivity();
         model = new ViewModelProvider(this, new ViewModelProvider.Factory() {
             @NonNull @Override public <T extends ViewModel> T create(@NonNull Class<T> type) {
                 if (type != LoginViewModel.class) throw new IllegalArgumentException("Unknown ViewModel");
-                return type.cast(new LoginViewModel(host.authRepository()));
+                return type.cast(new LoginViewModel(services.auth()));
             }
         }).get(LoginViewModel.class);
         binding = EfFragmentLoginBinding.bind(view);
@@ -53,14 +54,14 @@ public final class LoginFragment extends Fragment {
             if (value != null && !value.isEmpty()) binding.efMessage.setText(messageResource(value));
         });
         model.authenticated.observe(getViewLifecycleOwner(), value -> {
-            if (Boolean.TRUE.equals(value) && isResumed()) host.onAuthenticated();
+            if (Boolean.TRUE.equals(value) && isResumed()) ((LoginCallbacks) requireActivity()).onAuthenticated();
         });
         renderMode();
     }
 
     @Override public void onResume() {
         super.onResume();
-        if (model != null && Boolean.TRUE.equals(model.authenticated.getValue())) ((LoginHost) requireActivity()).onAuthenticated();
+        if (model != null && Boolean.TRUE.equals(model.authenticated.getValue())) ((LoginCallbacks) requireActivity()).onAuthenticated();
     }
 
     @Override public void onDestroyView() { binding = null; super.onDestroyView(); }

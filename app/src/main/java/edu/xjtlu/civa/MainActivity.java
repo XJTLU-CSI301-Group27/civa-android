@@ -9,12 +9,12 @@ import edu.xjtlu.civa.core.data.ApiCalls;
 import edu.xjtlu.civa.core.data.ApiProvider;
 import edu.xjtlu.civa.core.data.AuthRepository;
 import edu.xjtlu.civa.core.data.SessionStore;
-import edu.xjtlu.civa.feature.ef.HouseholdHost;
+import edu.xjtlu.civa.core.data.AppServices;
+import edu.xjtlu.civa.feature.ef.HouseholdCallbacks;
+import edu.xjtlu.civa.feature.ef.LoginCallbacks;
 import edu.xjtlu.civa.feature.ef.LoginFragment;
-import edu.xjtlu.civa.feature.ef.LoginHost;
-import edu.xjtlu.civa.feature.bd.BdHost;
 
-public class MainActivity extends AppCompatActivity implements LoginHost, HouseholdHost, BdHost {
+public class MainActivity extends AppCompatActivity implements AppServices, LoginCallbacks, HouseholdCallbacks {
     private AppContainer container;
     private AppNavigator navigator;
     private NavigationBarView navigation;
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements LoginHost, Househ
         }
     }
 
-    @Override public AuthRepository authRepository() { return container.auth; }
+    @Override public AuthRepository auth() { return container.auth; }
 
     @Override public ApiProvider api() { return container.api; }
 
