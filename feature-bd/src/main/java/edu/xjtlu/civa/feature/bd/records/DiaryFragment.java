@@ -5,12 +5,14 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.*;
 import edu.xjtlu.civa.api.model.*;
+import edu.xjtlu.civa.core.data.AppServices;
+import edu.xjtlu.civa.core.ui.CivaScreen;
 import edu.xjtlu.civa.core.ui.Route;
 import edu.xjtlu.civa.feature.bd.*;
 import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 
-public final class DiaryFragment extends BdScreen {
+public final class DiaryFragment extends CivaScreen<AppServices> {
   private DiaryViewModel model;
 
   public DiaryFragment() {}
@@ -54,12 +56,12 @@ public final class DiaryFragment extends BdScreen {
   private void render() {
     if (binding == null) return;
     title("我的饮食手帐", "每天的味道，都可以回来看看", model.message);
-    button(binding.bdActions, "刷新", !model.busy, model::load);
-    button(binding.bdActions, "回到今天", !model.busy, () -> model.select(LocalDate.now()));
-    button(binding.bdActions, "选择日期", !model.busy, () -> pickDate(model.selected, model::select));
-    button(binding.bdActions, "餐食计划", true, () -> host.navigate(Route.PLAN, null));
+    button(binding.civaActions, "刷新", !model.busy, model::load);
+    button(binding.civaActions, "回到今天", !model.busy, () -> model.select(LocalDate.now()));
+    button(binding.civaActions, "选择日期", !model.busy, () -> pickDate(model.selected, model::select));
+    button(binding.civaActions, "餐食计划", true, () -> host.navigate(Route.PLAN, null));
     LinearLayout calendar =
-        card(binding.bdPrimary, model.month.getYear() + " 年 " + model.month.getMonthValue() + " 月");
+        card(binding.civaPrimary, model.month.getYear() + " 年 " + model.month.getMonthValue() + " 月");
     LinearLayout nav = new LinearLayout(requireContext());
     calendar.addView(nav);
     button(nav, "上个月", !model.busy, () -> model.changeMonth(-1));
@@ -78,7 +80,7 @@ public final class DiaryFragment extends BdScreen {
       cell(grid, Integer.toString(day) + (marked ? " ·" : ""), date, date.equals(model.selected));
     }
     label(calendar, "· 表示有实际用餐记录", 13);
-    LinearLayout details = card(binding.bdSecondary, model.selected + " · 实际用餐");
+    LinearLayout details = card(binding.civaSecondary, model.selected + " · 实际用餐");
     button(
         details,
         "记录这一餐 / 补录",
@@ -120,11 +122,11 @@ public final class DiaryFragment extends BdScreen {
           model.selected.isAfter(LocalDate.now()) ? "未来餐食请前往计划安排。" : "这一天还没有记录，可以补记一顿饭。",
           15);
     if (model.pending != null) {
-      LinearLayout pending = card(binding.bdSecondary, "有提交结果待确认");
+      LinearLayout pending = card(binding.civaSecondary, "有提交结果待确认");
       button(pending, "使用原请求重试", !model.busy, model::retryPending);
       button(pending, "核对后移除本地标记", !model.busy, () -> abandon(model::abandon));
     }
-    LinearLayout review = card(binding.bdPrimary, "饮食回顾");
+    LinearLayout review = card(binding.civaPrimary, "饮食回顾");
     LocalDate monday = model.selected.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     button(review, "查看所选日期这一周", true, () -> model.loadSummary(monday, monday.plusDays(6)));
     button(

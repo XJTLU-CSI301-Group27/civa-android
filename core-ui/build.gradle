@@ -8,4 +8,10 @@ android {
     buildFeatures { viewBinding true }
     lint { error 'ResourceName' }
 }
-dependencies { implementation libs.material; implementation libs.annotation; testImplementation libs.junit }
+dependencies {
+    implementation libs.material
+    implementation libs.annotation
+    implementation libs.fragment
+    implementation libs.appcompat
+    testImplementation libs.junit
+}

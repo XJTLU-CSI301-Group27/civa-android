@@ -6,13 +6,15 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.*;
 import edu.xjtlu.civa.api.model.*;
+import edu.xjtlu.civa.core.data.AppServices;
+import edu.xjtlu.civa.core.ui.CivaScreen;
 import edu.xjtlu.civa.core.ui.Route;
 import edu.xjtlu.civa.feature.bd.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
-public final class PlanningFragment extends BdScreen {
+public final class PlanningFragment extends CivaScreen<AppServices> {
   private PlanningViewModel model;
 
   public PlanningFragment() {}
@@ -42,7 +44,7 @@ public final class PlanningFragment extends BdScreen {
         "从 " + model.start + " 开始的两周菜单 · 自主安排与随机灵感",
         model.busy ? "正在处理，请稍候…" : model.message);
     button(
-        binding.bdActions,
+        binding.civaActions,
         "选日期",
         !model.busy,
         () ->
@@ -56,7 +58,7 @@ public final class PlanningFragment extends BdScreen {
                   model.emit();
                 }));
     button(
-        binding.bdActions,
+        binding.civaActions,
         "今天",
         !model.busy,
         () -> {
@@ -66,20 +68,20 @@ public final class PlanningFragment extends BdScreen {
           model.load();
           model.emit();
         });
-    button(binding.bdActions, "刷新", !model.busy, model::load);
+    button(binding.civaActions, "刷新", !model.busy, model::load);
     button(
-        binding.bdActions,
+        binding.civaActions,
         "生成菜单",
         !model.busy && model.pending == null && model.home() != null,
         this::generate);
-    button(binding.bdActions, "家庭", true, () -> host.navigate(Route.HOUSEHOLD, null));
+    button(binding.civaActions, "家庭", true, () -> host.navigate(Route.HOUSEHOLD, null));
     if (model.pending != null) {
-      LinearLayout pending = card(binding.bdPrimary, "有提交结果待确认");
+      LinearLayout pending = card(binding.civaPrimary, "有提交结果待确认");
       label(pending, "先刷新核对，再用相同请求重试。不要重复新建同一次安排。", 14);
       button(pending, "原请求重试", !model.busy, model::retryPending);
       button(pending, "核对并移除标记", !model.busy, () -> abandon(model::abandon));
     }
-    LinearLayout days = card(binding.bdPrimary, "选择日期");
+    LinearLayout days = card(binding.civaPrimary, "选择日期");
     HorizontalScrollView scroll = new HorizontalScrollView(requireContext());
     LinearLayout strip = new LinearLayout(requireContext());
     scroll.addView(strip);
@@ -98,12 +100,12 @@ public final class PlanningFragment extends BdScreen {
             model.emit();
           });
     }
-    label(binding.bdPrimary, model.selected + " 的安排", 20);
+    label(binding.civaPrimary, model.selected + " 的安排", 20);
     for (PlanMealType meal : PlanMealType.values()) {
       PlanSlot slot = model.slot(model.selected, meal);
       LinearLayout panel =
           card(
-              binding.bdPrimary,
+              binding.civaPrimary,
               mealName(meal) + (slot != null && slot.getLocked() ? " · 已锁定" : ""));
       List<PlanItem> items = slot == null ? Collections.emptyList() : slot.getItems();
       if (items.isEmpty()) label(panel, "还没有安排，给这一餐留一点期待。", 15);
@@ -127,7 +129,7 @@ public final class PlanningFragment extends BdScreen {
           !model.busy && model.pending == null && model.home() != null,
           () -> model.lock(meal));
     }
-    LinearLayout preview = card(binding.bdSecondary, "待保存预览");
+    LinearLayout preview = card(binding.civaSecondary, "待保存预览");
     if (model.draft.isEmpty()) label(preview, "选菜或生成后在这里确认。预览不会修改已保存的菜单。", 15);
     for (PlanSlotWrite slot : model.draft) {
       label(preview, slot.getDate() + " · " + mealName(slot.getMealType()), 16);

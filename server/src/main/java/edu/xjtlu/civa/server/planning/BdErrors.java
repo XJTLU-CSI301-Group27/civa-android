@@ -1,6 +1,7 @@
 package edu.xjtlu.civa.server.planning;
 
 import edu.xjtlu.civa.server.auth.ApiExceptionHandler;
+import edu.xjtlu.civa.server.web.ApiFailure;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import org.springframework.http.HttpHeaders;
@@ -10,8 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 class BdErrors {
-  @ExceptionHandler(BdRules.Failure.class)
-  ResponseEntity<Map<String, Object>> failure(BdRules.Failure error, HttpServletRequest request) {
+  @ExceptionHandler(ApiFailure.class)
+  ResponseEntity<Map<String, Object>> failure(ApiFailure error, HttpServletRequest request) {
     int status =
         switch (error.code) {
           case "NOT_FOUND" -> 404;

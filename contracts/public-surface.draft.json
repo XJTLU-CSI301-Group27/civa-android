@@ -94,12 +94,12 @@
       "incomplete": ["application container", "public surface approval"]
     },
     {
-      "type": "edu.xjtlu.civa.feature.ef.LoginHost",
+      "type": "edu.xjtlu.civa.core.data.AppServices",
       "kind": "interface",
-      "owner": "EF/E",
-      "consumers": ["app"],
+      "owner": "EF/F",
+      "consumers": ["app", "feature-ac", "feature-bd", "feature-ef"],
       "thread": "main",
-      "members": ["AuthRepository authRepository()", "void onAuthenticated()"],
+      "members": ["ApiProvider api()", "ApiCalls calls()", "SessionStore sessions()", "AuthRepository auth()", "void navigate(Route route, String entityId)"],
       "incomplete": ["public surface approval"]
     },
     {
@@ -112,12 +112,21 @@
       "incomplete": ["runtime device verification", "public surface approval"]
     },
     {
-      "type": "edu.xjtlu.civa.feature.ef.HouseholdHost",
+      "type": "edu.xjtlu.civa.feature.ef.LoginCallbacks",
       "kind": "interface",
       "owner": "EF/E",
       "consumers": ["app"],
       "thread": "main",
-      "members": ["ApiProvider api()", "ApiCalls calls()", "AuthRepository authRepository()", "SessionStore sessions()", "void onHouseholdReady()"],
+      "members": ["void onAuthenticated()"],
+      "incomplete": ["public surface approval"]
+    },
+    {
+      "type": "edu.xjtlu.civa.feature.ef.HouseholdCallbacks",
+      "kind": "interface",
+      "owner": "EF/E",
+      "consumers": ["app"],
+      "thread": "main",
+      "members": ["void onHouseholdReady()"],
       "incomplete": ["public surface approval"]
     },
     {
@@ -241,24 +250,7 @@
       "thread": "any",
       "members": ["final String code"]
     },
-    {
-      "type": "edu.xjtlu.civa.feature.bd.BdHost",
-      "kind": "interface",
-      "owner": "BD",
-      "consumers": [
-        "app"
-      ],
-      "thread": "main",
-      "members": [
-        "ApiProvider api()",
-        "ApiCalls calls()",
-        "SessionStore sessions()"
-      ],
-      "incomplete": [
-        "EF review pending: IC-20261120-BD-01",
-        "runtime device verification"
-      ]
-    },
+
     {
       "type": "edu.xjtlu.civa.feature.bd.planning.PlanningFragment",
       "kind": "class",

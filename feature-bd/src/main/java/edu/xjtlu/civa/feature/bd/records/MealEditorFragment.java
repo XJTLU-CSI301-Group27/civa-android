@@ -6,6 +6,8 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.*;
 import edu.xjtlu.civa.api.model.*;
+import edu.xjtlu.civa.core.data.AppServices;
+import edu.xjtlu.civa.core.ui.CivaScreen;
 import edu.xjtlu.civa.core.ui.Route;
 import edu.xjtlu.civa.feature.bd.*;
 import java.math.*;
@@ -13,7 +15,7 @@ import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-public final class MealEditorFragment extends BdScreen {
+public final class MealEditorFragment extends CivaScreen<AppServices> {
   private DiaryViewModel model;
   private Draft draft;
   private MealEntry original;
@@ -72,7 +74,7 @@ public final class MealEditorFragment extends BdScreen {
           }
           if (!built && (draft.entryId == null || original != null)) build();
           else if (!built) showLoading();
-          binding.bdStatus.setText(model.message);
+          binding.civaStatus.setText(model.message);
           enableForm();
         });
     if (!model.loaded) {
@@ -88,17 +90,17 @@ public final class MealEditorFragment extends BdScreen {
 
   private void showLoading() {
     title("编辑食记", "原记录加载完成后才能编辑", model.message);
-    button(binding.bdActions, "返回食记", true, () -> host.navigate(Route.DIARY, draft.date));
-    button(binding.bdActions, "重试读取", !model.busy, model::load);
-    label(binding.bdPrimary, "如果记录已被删除，请返回日历刷新；未读取原记录时不会误建新记录。", 15);
+    button(binding.civaActions, "返回食记", true, () -> host.navigate(Route.DIARY, draft.date));
+    button(binding.civaActions, "重试读取", !model.busy, model::load);
+    label(binding.civaPrimary, "如果记录已被删除，请返回日历刷新；未读取原记录时不会误建新记录。", 15);
   }
 
   private void build() {
     built = true;
     title(draft.entryId == null ? "记录这一餐" : "编辑这条食记", "只记录本人实际摄入 · 不扣减原材料", model.message);
-    button(binding.bdActions, "返回食记", true, () -> host.navigate(Route.DIARY, null));
-    button(binding.bdActions, "保存", !model.busy && model.pending == null, this::save);
-    LinearLayout form = card(binding.bdPrimary, "实际用餐");
+    button(binding.civaActions, "返回食记", true, () -> host.navigate(Route.DIARY, null));
+    button(binding.civaActions, "保存", !model.busy && model.pending == null, this::save);
+    LinearLayout form = card(binding.civaPrimary, "实际用餐");
     EditText date =
         field(
             form, "日期 YYYY-MM-DD", draft.date, InputType.TYPE_CLASS_DATETIME, v -> draft.date = v);
@@ -139,7 +141,7 @@ public final class MealEditorFragment extends BdScreen {
     button(form, "保存食记", true, () -> save());
     button(form, "使用原请求重试", true, () -> model.retryPending());
     button(form, "核对后移除待确认标记", true, () -> abandon(model::abandon));
-    LinearLayout sources = card(binding.bdSecondary, "从现有资料预填");
+    LinearLayout sources = card(binding.civaSecondary, "从现有资料预填");
     button(sources, "选择家庭菜谱", true, () -> selectRecipe());
     button(
         sources,
@@ -271,7 +273,7 @@ public final class MealEditorFragment extends BdScreen {
 
   private void enableForm() {
     if (binding == null) return;
-    enabled(binding.bdPrimary, !model.busy && model.pending == null);
+    enabled(binding.civaPrimary, !model.busy && model.pending == null);
   }
 
   private void enabled(android.view.View view, boolean value) {
