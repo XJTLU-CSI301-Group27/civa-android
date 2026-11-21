@@ -36,18 +36,6 @@ changes are found. `python scripts/contract_guard.py check|draft` adds the IC
 authorization gate (a change must be covered by an ACCEPTED interface-change
 record) and digest verification; neither replaces the full preflight.
 
-## BD MVP update 2026-11-20
-
-Meal planning and personal meal logs now have real Android screens and backend
-implementations. The MVP includes manual/random planning, previews, lock/version
-checks, a historical meal calendar and meal-entry CRUD. Calories, stock-based
-recommendation and cooking transactions are deferred in the UI.
-
-See [BD handoff](docs/BD_HANDOFF.md) for exact scope, validation, proposed integration
-changes and the explicit import of six attributed HowToCook recipes into an
-existing household. The shared recipe catalog has a minimal read adapter; AC
-should extend or replace its single controller rather than duplicate routes.
-
 ## Required reading
 
 Read these before changing code:
@@ -150,11 +138,14 @@ still incomplete; see `docs/verification/BOOTSTRAP.md`.
 
 The following operations are placeholders and return `CONTRACT_NOT_IMPLEMENTED`
 when reached with a valid authenticated request: `addWishlist`,
-`changeInventory`, `confirmCooking`, `createInventoryBatch`,
-`createInvitation`, `createRecipe`, `getMediaContent`, `getPreferences`, `listIngredients`, `listInventoryBatches`,
-`listInventoryMovements`, `matchRecipes`, `previewCooking`, `removeMember`,
-`removeWishlist`, `setRecipeArchived`,
-`updateInventoryBatch`, `updatePreferences`, `updateRecipe`,
+`changeInventory`, `commitPlan`, `confirmCooking`, `createInventoryBatch`,
+`createInvitation`, `createMealEntry`, `createRecipe`, `deleteMealEntry`,
+`getMealSummary`, `getMediaContent`, `getPreferences`, `getRecipe`,
+`listCookingEvents`, `listIngredients`, `listInventoryBatches`,
+`listInventoryMovements`, `listMealEntries`, `listPlanSlots`, `listRecipes`,
+`listWishlist`, `matchRecipes`, `previewCooking`, `removeMember`,
+`removeWishlist`, `replacePlanSlot`, `setPlanSlotLock`, `setRecipeArchived`,
+`updateInventoryBatch`, `updateMealEntry`, `updatePreferences`, `updateRecipe`,
 and `uploadMedia`. Authentication and request validation still run first.
 
 ## Current bootstrap status

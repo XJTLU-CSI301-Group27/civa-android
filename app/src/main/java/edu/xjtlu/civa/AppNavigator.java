@@ -6,10 +6,6 @@ import edu.xjtlu.civa.core.ui.Route;
 import edu.xjtlu.civa.core.data.SessionStore;
 import edu.xjtlu.civa.feature.ef.HouseholdFragment;
 import edu.xjtlu.civa.feature.ef.LoginFragment;
-import edu.xjtlu.civa.feature.bd.planning.PlanningFragment;
-import edu.xjtlu.civa.feature.bd.records.DiaryFragment;
-import edu.xjtlu.civa.feature.bd.records.MealEditorFragment;
-import edu.xjtlu.civa.feature.bd.records.CookingFragment;
 
 final class AppNavigator implements NavHost {
     private final FragmentManager fragments;
@@ -42,10 +38,6 @@ final class AppNavigator implements NavHost {
         if (primary) fragments.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         var fragment = route == Route.LOGIN ? new LoginFragment()
                 : route == Route.HOUSEHOLD ? new HouseholdFragment()
-                : route == Route.TODAY || route == Route.PLAN ? new PlanningFragment()
-                : route == Route.DIARY ? DiaryFragment.create(entityId)
-                : route == Route.MEAL_EDIT ? MealEditorFragment.create(entityId == null ? java.time.LocalDate.now().toString() : entityId)
-                : route == Route.COOKING_CONFIRM ? CookingFragment.create(entityId)
                 : PlaceholderFragment.create(title, entityId);
         var transaction = fragments.beginTransaction().replace(R.id.app_content, fragment);
         if (!primary) transaction.addToBackStack(null);
