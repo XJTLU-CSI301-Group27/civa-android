@@ -1,0 +1,9 @@
+<resources>
+    <!-- User-approved refrigerator illustration colors; common controls retain the EF theme. -->
+    <color name="ac_fridge_shell">#DBE2D6</color>
+    <color name="ac_fridge_edge">#B4C3A8</color>
+    <color name="ac_fridge_inside">#F5F7EF</color>
+    <color name="ac_fridge_door">#B4C3A8</color>
+    <color name="ac_fridge_ink">#263C32</color>
+    <color name="ac_fridge_shelf">#C6D3C1</color>
+</resources>

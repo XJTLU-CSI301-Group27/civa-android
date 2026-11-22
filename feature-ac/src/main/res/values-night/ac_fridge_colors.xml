@@ -1,0 +1,8 @@
+<resources>
+    <color name="ac_fridge_shell">#354034</color>
+    <color name="ac_fridge_edge">#70816B</color>
+    <color name="ac_fridge_inside">#263127</color>
+    <color name="ac_fridge_door">#51674F</color>
+    <color name="ac_fridge_ink">#E2EBE3</color>
+    <color name="ac_fridge_shelf">#53654E</color>
+</resources>

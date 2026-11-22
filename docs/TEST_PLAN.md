@@ -27,6 +27,18 @@
 
 ## Evidence
 
+### C initial native fridge UI: taskc_version2
+
+Adds InventoryPresentationTest (four cases), native fridge fixtures and historical
+wide/narrow screenshots. The current revalidation and comparison with uploaded
+version 1 are maintained in [taskc_version2](c-history/taskc_version2.md).
+Android build/contract checks passed; local test reports total 30 cases with
+no failures (4 new AC presentation tests executed), lint 0 errors / 9 warnings.
+The unchanged server tests were not rerun for this UI-only restoration.
+Historical UI evidence is distinguished from the current build; no physical
+Xiaomi or new emulator click-through result is claimed.
+
+
 ### C inventory backend verification (2026-11-21)
 
 `InventoryHttpIntegrationTest` exercises the existing generated routes through

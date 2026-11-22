@@ -1,7 +1,8 @@
 # Civa Android
 
 本地 C 库存模块状态与使用说明：[C 开发与验证交接](docs/C_HANDOFF.md)。
-库存后端核心实现已通过本地测试；Android 库存页面及最终做饭扣减接入仍未完成。
+库存后端已接入初步原生冰箱页面；最终做饭扣减接入仍未完成。
+第二版开发说明：[taskc_version2](docs/c-history/taskc_version2.md)。
 
 CSI301 Android group project for household recipes, meal planning, inventory,
 cooking records, personal meal logs, and shared household access.

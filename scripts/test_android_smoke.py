@@ -77,11 +77,13 @@ def main():
     for tab, title in [('app_recipes', '菜谱'), ('app_inventory', '冰箱'), ('app_diary', '食记'), ('app_profile', '我的'), ('app_today', '今天')]:
         tap(tree, tab)
         tree = screen()
-        if control(tree, 'app_title') is None or control(tree, 'app_title').get('text') != title:
+        correct = control(tree, 'ac_add') is not None if tab == 'app_inventory' else (
+            control(tree, 'app_title') is not None and control(tree, 'app_title').get('text') == title)
+        if not correct:
             raise RuntimeError('Navigation failed for ' + tab)
     if not adb('shell', 'pidof', 'edu.xjtlu.civa').strip():
         raise RuntimeError('App process stopped during navigation.')
-    print('PASS: all five navigation tabs; business content remains placeholders', flush=True)
+    print('PASS: all five navigation tabs including the native inventory screen', flush=True)
 
 
 if __name__ == '__main__':

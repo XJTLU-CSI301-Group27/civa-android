@@ -1,0 +1,9 @@
+<resources>
+    <string name="ac_fridge_title">打开冰箱，看看有什么。</string>
+    <string name="ac_fridge_subtitle">食材分层收好，新鲜一目了然。</string>
+    <string name="ac_add_food">＋ 添加食材</string>
+    <string name="ac_open_fridge">打开冰箱</string>
+    <string name="ac_refresh">刷新</string>
+    <string name="ac_retry_write">核对并重试原请求</string>
+    <string name="ac_abandon_write">已核对结果，结束待确认记录</string>
+</resources>

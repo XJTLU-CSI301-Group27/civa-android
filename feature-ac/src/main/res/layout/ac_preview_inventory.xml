@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Editor-only sample text: tools:* is stripped from the APK. This layout is never inflated by the app. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    tools:context=".inventory.InventoryFragment"
+    tools:theme="@style/CivaTheme.Civa"
+    tools:device="spec:width=1280dp,height=900dp,dpi=160">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ac_fridge_title" android:textAppearance="?attr/textAppearanceHeadline5" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp" tools:text="Android Studio 静态预览 · 示例仅供看布局；交互请运行 app 模拟器" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="16dp">
+            <com.google.android.material.button.MaterialButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ac_add_food" />
+            <com.google.android.material.button.MaterialButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" tools:text="关上冰箱" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal" android:paddingTop="16dp">
+            <LinearLayout android:layout_width="420dp" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp" android:background="@drawable/ac_fridge_shell">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/ac_fridge_ink" android:padding="12dp" android:textSize="16sp" tools:text="冷藏室 · CHILL" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="8dp" android:textColor="@color/ac_fridge_ink" tools:text="蛋奶 · 每日补给" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="@color/ac_fridge_inside">
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="100dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥛\n鲜牛奶\n3 瓶" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="100dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥚\n鸡蛋\n6 个" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="100dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥛\n酸奶\n2 瓶" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="8dp" android:textColor="@color/ac_fridge_ink" tools:text="蔬菜 · 留住鲜绿" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="@color/ac_fridge_inside">
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="100dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥬\n小白菜\n300 克" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="100dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥦\n西兰花\n400 克" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="100dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🍅\n西红柿\n500 克" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="8dp" android:textColor="@color/ac_fridge_ink" tools:text="水果 · 一点甜" />
+                <TextView android:layout_width="match_parent" android:layout_height="90dp" android:gravity="center" android:background="@color/ac_fridge_inside" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🍎  苹果 450克       🍊 橙子 4个" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp" android:textColor="@color/ac_fridge_ink" android:textSize="16sp" tools:text="冷冻室 · FREEZE" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="@color/ac_fridge_inside">
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="16sp" tools:text="肉类储备\n\n🥩 牛肉 500克\n🥓 猪肉 350克\n🍖 羊肉 400克" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="16sp" tools:text="海鲜储备\n\n🦐 鲜虾 12个\n🐚 贝柱 8个" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:layout_width="260dp" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="冰箱里的小档案" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="20dp" android:textSize="24sp" tools:text="🥩 牛肉" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="16dp" android:textSize="24sp" tools:text="剩余 500 克" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="16dp" tools:text="储存位置：冷冻 · 肉类抽屉\n录入日期：2026-11-22\n到期日期：2026-12-02\n批次：示例批次" />
+                <com.google.android.material.button.MaterialButton android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" tools:text="记录消耗" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

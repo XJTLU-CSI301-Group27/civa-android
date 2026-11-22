@@ -2,6 +2,12 @@
 
 Status: Draft
 
+C native UI candidate: InventoryFragment / InventoryHost assembly is described
+in [IC-20261122-C-UI-01](../contracts/changes/IC-20261122-C-UI-01.md) and the
+draft public surface. Reuses existing inventory routes, units, authentication
+and household ownership; no OpenAPI or database schema change. Team proposal
+status remains PROPOSED.
+
 2026-11-20 BD MVP implementation note: the existing OpenAPI remains unchanged.
 New Android entry symbols, navigation reference syntax, a minimal shared recipe
 read adapter, and the additive starter dictionary/import are proposed in
