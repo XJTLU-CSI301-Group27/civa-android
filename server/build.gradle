@@ -42,6 +42,7 @@ tasks.register('unitTest', Test) {
     classpath = sourceSets.test.runtimeClasspath
     include '**/CredentialsTest.class', '**/InvitationCodesTest.class', '**/CanonicalRequestDigestTest.class', '**/JsonbCodecTest.class', '**/TestDatabaseGuardUnitTest.class', '**/SafeFlywayTestConfigurationTest.class'
     inputs.file '../contracts/openapi.json'
+    include '**/IngredientNamesTest.class', '**/InventoryRulesTest.class', '**/InventoryCalculatorTest.class'
     systemProperty 'civa.contractDraft', file('../contracts/openapi.json').absolutePath
     useJUnitPlatform()
 }

@@ -9,6 +9,15 @@ read adapter, and the additive starter dictionary/import are proposed in
 record EF acceptance. Implementation, scope reductions, source attribution,
 actual validation and integration steps are maintained in `docs/BD_HANDOFF.md`.
 
+Implementation note (2026-11-21, C / Issue #9): the existing candidate
+`InventoryApi` operations now have backend implementations in
+`server/.../inventory`. No OpenAPI field, enum, method signature or database
+schema was changed. See [C_HANDOFF.md](C_HANDOFF.md) for tested behavior.
+This implementation does not approve the draft baseline. A future cross-group
+allocation entry point is proposed separately in
+[IC-9](../contracts/changes/IC-9.md); its implementation is currently internal
+and is not an approved public service for BD/EF.
+
 This document is the source of truth for cross-group data. The team must agree on
 the final storage representation before implementation. Public contracts must
 not be changed silently.

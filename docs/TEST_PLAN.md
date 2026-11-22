@@ -27,6 +27,34 @@
 
 ## Evidence
 
+### C inventory backend verification (2026-11-21)
+
+`InventoryHttpIntegrationTest` exercises the existing generated routes through
+real authentication and PostgreSQL: alias search, active ingredients, pagination,
+separate batches, canonical units, expiry endpoints, metadata-only updates,
+quantity movements, household isolation, revoked access/replay, idempotency,
+stale concurrent writes, same-key concurrent requests, matching/allocation
+read-only behavior, and lock timeout rollback/retry.
+
+`InventoryRulesTest` and `InventoryCalculatorTest` cover decimal bounds,
+strict dates, rounding, full/partial/missing/unknown matching, untracked lines,
+expired/zero stock, and earliest-expiry/creation/ID allocation ordering.
+`IngredientNamesTest` includes Unicode length boundaries.
+
+The original C development run has 37 tests with no failures; the isolated unit task
+has 18 tests and the candidate contract task has 4 (tasks overlap).
+Commands, setup, limitations, and the proposed cooking integration are recorded
+in [C_HANDOFF.md](C_HANDOFF.md). No Android inventory UI or tablet validation
+is claimed by these backend tests.
+
+C-V01 revalidation against main `a0943b1` (2026-11-22): server 43 tests,
+isolated unit task 18, candidate contract task 4 and Android local tests 26
+all passed. Android assemble, all-module lint (0 errors, 2 existing app warnings),
+contract checks, 17 Python tests and the Windows launcher check passed.
+Commands and environment corrections are recorded in
+[c-history/C-V01-库存后端基础实现.md](c-history/C-V01-库存后端基础实现.md).
+No inventory UI or physical-tablet validation was performed for this backend version.
+
 Each pull request must list:
 
 - commands actually executed;
