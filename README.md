@@ -1,5 +1,9 @@
 # Civa Android
 
+本地 C 库存模块状态与使用说明：[C 开发与验证交接](docs/C_HANDOFF.md)。
+库存后端已接入初步原生冰箱页面；最终做饭扣减接入仍未完成。
+开发记录：[C 库存五版索引](docs/c-history/README.md)。最终保留源码与验证限制见 [taskc_version5](docs/c-history/taskc_version5.md)。
+
 CSI301 Android group project for household recipes, meal planning, inventory,
 cooking records, personal meal logs, and shared household access.
 
@@ -150,12 +154,19 @@ still incomplete; see `docs/verification/BOOTSTRAP.md`.
 
 The following operations are placeholders and return `CONTRACT_NOT_IMPLEMENTED`
 when reached with a valid authenticated request: `addWishlist`,
-`changeInventory`, `confirmCooking`, `createInventoryBatch`,
-`createInvitation`, `createRecipe`, `getMediaContent`, `getPreferences`, `listIngredients`, `listInventoryBatches`,
-`listInventoryMovements`, `matchRecipes`, `previewCooking`, `removeMember`,
-`removeWishlist`, `setRecipeArchived`,
-`updateInventoryBatch`, `updatePreferences`, `updateRecipe`,
+`confirmCooking`,
+`createInvitation`, `createRecipe`, `getMediaContent`, `getPreferences`,
+`previewCooking`, `removeMember`, `removeWishlist`, `setRecipeArchived`,
+`updatePreferences`, `updateRecipe`,
 and `uploadMedia`. Authentication and request validation still run first.
+
+Inventory backend operations now have real implementations: `listIngredients`,
+`listInventoryBatches`, `createInventoryBatch`, `updateInventoryBatch`,
+`changeInventory`, `listInventoryMovements`, and `matchRecipes`.
+See [C inventory development handoff](docs/C_HANDOFF.md) for behavior,
+verification commands, local setup, and the remaining Android/cooking integration.
+
+C development versions: [C-V01: inventory backend](docs/c-history/C-V01-库存后端基础实现.md).
 
 ## Current bootstrap status
 

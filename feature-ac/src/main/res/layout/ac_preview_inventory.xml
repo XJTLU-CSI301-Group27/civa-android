@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview the same screen scaffold as the app; sample values are editor-only. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    tools:theme="@style/CivaTheme.Civa"
+    tools:device="spec:width=900dp,height=1280dp,dpi=160">
+    <include layout="@layout/ac_fragment_inventory" />
+</FrameLayout>

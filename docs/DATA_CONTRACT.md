@@ -2,12 +2,37 @@
 
 Status: Draft
 
+C typed-entry candidate adds POST /api/v1/ingredients (createIngredient), using
+CreateIngredientRequest and the existing Ingredient / Unit. See
+[IC-20261122-C-FREE-ENTRY](../contracts/changes/IC-20261122-C-FREE-ENTRY.md).
+Reuses global canonical ingredients and aliases; inventory remains household
+scoped. Active household membership, idempotency, unit conflicts and concurrent
+name reuse are checked. No database migration or old-ID/unit rewrite.
+Local implementation follows the explicitly confirmed creation scope; team
+proposal status remains PROPOSED.
+
+
+C native UI candidate: InventoryFragment / InventoryHost assembly is described
+in [IC-20261122-C-UI-01](../contracts/changes/IC-20261122-C-UI-01.md) and the
+draft public surface. Reuses existing inventory routes, units, authentication
+and household ownership; no OpenAPI or database schema change. Team proposal
+status remains PROPOSED.
+
 2026-11-20 BD MVP implementation note: the existing OpenAPI remains unchanged.
 New Android entry symbols, navigation reference syntax, a minimal shared recipe
 read adapter, and the additive starter dictionary/import are proposed in
 `contracts/changes/IC-20261120-BD-01.md`. This does not approve the baseline or
 record EF acceptance. Implementation, scope reductions, source attribution,
 actual validation and integration steps are maintained in `docs/BD_HANDOFF.md`.
+
+Implementation note (2026-11-21, C / Issue #9): the existing candidate
+`InventoryApi` operations now have backend implementations in
+`server/.../inventory`. No OpenAPI field, enum, method signature or database
+schema was changed. See [C_HANDOFF.md](C_HANDOFF.md) for tested behavior.
+This implementation does not approve the draft baseline. A future cross-group
+allocation entry point is proposed separately in
+[IC-9](../contracts/changes/IC-9.md); its implementation is currently internal
+and is not an approved public service for BD/EF.
 
 This document is the source of truth for cross-group data. The team must agree on
 the final storage representation before implementation. Public contracts must

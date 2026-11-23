@@ -3224,6 +3224,335 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createIngredient",
+        "tags": [
+          "Inventory"
+        ],
+        "x-owner": "C",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "INTERNAL_ERROR"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "CONTRACT_NOT_IMPLEMENTED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "CONTRACT_NOT_IMPLEMENTED"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "TEMPORARILY_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "TEMPORARILY_UNAVAILABLE"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds"
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "RATE_LIMITED"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds"
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_ERROR"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "UNAUTHENTICATED"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "HOUSEHOLD_REQUIRED, HOUSEHOLD_ACCESS_REVOKED, FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "HOUSEHOLD_REQUIRED",
+                            "HOUSEHOLD_ACCESS_REVOKED",
+                            "FORBIDDEN"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "NOT_FOUND"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "IDEMPOTENCY_KEY_REUSED, UNIT_CONFLICT, INGREDIENT_INACTIVE, NAME_CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "IDEMPOTENCY_KEY_REUSED",
+                            "UNIT_CONFLICT",
+                            "INGREDIENT_INACTIVE",
+                            "NAME_CONFLICT"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          }
+        },
+        "x-idempotent": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIngredientRequest"
+              }
+            }
+          }
+        },
+        "description": "Create or reuse a shared canonical ingredient by typed name. Requires an active household membership; does not create inventory. Existing aliases resolve to their ingredient; units are never overwritten."
       }
     },
     "/api/v1/households/{householdId}/recipes": {
@@ -13626,6 +13955,24 @@
           "message",
           "traceId",
           "fieldErrors"
+        ]
+      },
+      "CreateIngredientRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit"
+          }
+        },
+        "required": [
+          "name",
+          "unit"
         ]
       }
     },

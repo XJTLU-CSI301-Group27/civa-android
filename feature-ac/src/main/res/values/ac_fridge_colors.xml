@@ -1,0 +1,22 @@
+<resources>
+    <!-- Local colors for the user-approved fridge illustration, within the existing EF theme. -->
+    <color name="ac_fridge_background">#F7F6F2</color>
+    <color name="ac_fridge_panel">#FFFEF9</color>
+    <color name="ac_fridge_muted">#727E74</color>
+    <color name="ac_fridge_line">#D9DFD6</color>
+    <color name="ac_fridge_accent">#526D56</color>
+    <color name="ac_fridge_door_light">#D2DDC7</color>
+    <color name="ac_fridge_door_dark">#9EAF92</color>
+    <color name="ac_fridge_drawer">#EDF1E6</color>
+    <color name="ac_fridge_selected">#E5EDDC</color>
+    <color name="ac_fridge_soon">#A96822</color>
+    <color name="ac_fridge_soon_background">#F4EBD9</color>
+    <color name="ac_fridge_expired">#B35B4D</color>
+    <color name="ac_fridge_expired_background">#F6E6E0</color>
+    <color name="ac_fridge_shell">#DBE2D6</color>
+    <color name="ac_fridge_edge">#B4C3A8</color>
+    <color name="ac_fridge_inside">#F5F7EF</color>
+    <color name="ac_fridge_door">#B4C3A8</color>
+    <color name="ac_fridge_ink">#263C32</color>
+    <color name="ac_fridge_shelf">#C6D3C1</color>
+</resources>

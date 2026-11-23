@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/ac_fridge_background" tools:theme="@style/CivaTheme.Civa">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:padding="8dp">
+        <LinearLayout android:id="@+id/ac_heading" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+            <LinearLayout android:id="@+id/ac_actions" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton android:id="@+id/ac_add" style="@style/ac_FridgeOutline" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ac_add_food" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/ac_open" style="@style/ac_FridgeAction" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="@string/ac_open_fridge" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/ac_refresh" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ac_refresh" />
+            </LinearLayout>
+        </LinearLayout>
+        <com.google.android.material.chip.ChipGroup android:id="@+id/ac_filters" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <com.google.android.material.chip.Chip android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="全部" android:textColor="@color/ac_fridge_ink" app:chipBackgroundColor="@color/ac_fridge_selected" />
+            <com.google.android.material.chip.Chip android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="未过期" android:textColor="@color/ac_fridge_ink" app:chipBackgroundColor="@color/ac_fridge_panel" />
+            <com.google.android.material.chip.Chip android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="临期" android:textColor="@color/ac_fridge_ink" app:chipBackgroundColor="@color/ac_fridge_panel" />
+            <com.google.android.material.chip.Chip android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="已过期" android:textColor="@color/ac_fridge_ink" app:chipBackgroundColor="@color/ac_fridge_panel" />
+        </com.google.android.material.chip.ChipGroup>
+        <ProgressBar android:id="@+id/ac_loading" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="4dp" android:indeterminate="true" android:visibility="gone" />
+        <TextView android:id="@+id/ac_message" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="@color/ac_fridge_ink" android:paddingBottom="4dp" android:maxLines="2" android:ellipsize="end" android:accessibilityLiveRegion="polite" android:visibility="gone" />
+        <LinearLayout android:id="@+id/ac_recovery" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <com.google.android.material.button.MaterialButton android:id="@+id/ac_retry_write" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ac_retry_write" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/ac_abandon_write" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ac_abandon_write" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/ac_workspace" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_horizontal" android:orientation="horizontal">
+            <LinearLayout android:id="@+id/ac_fridge" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="8dp" android:background="@drawable/ac_fridge_shell" android:elevation="3dp">
+                <include layout="@layout/ac_design_fridge" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="gone" tools:visibility="visible" />
+            </LinearLayout>
+            <ScrollView android:id="@+id/ac_detail_scroll" android:layout_width="270dp" android:layout_height="match_parent" android:visibility="gone">
+            <LinearLayout android:id="@+id/ac_detail" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="@color/ac_fridge_ink" android:visibility="gone" tools:visibility="visible" tools:text="冰箱里的小档案\n\n新鲜，有迹可循。\n\n打开冰箱门，点一下食材，查看剩余数量和存放日期。" />
+            </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

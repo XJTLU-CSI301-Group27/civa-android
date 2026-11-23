@@ -13,6 +13,39 @@
   },
   "symbols": [
     {
+      "type": "edu.xjtlu.civa.feature.ac.inventory.InventoryHost",
+      "kind": "interface",
+      "owner": "AC/C",
+      "consumers": [
+        "app"
+      ],
+      "thread": "main; network work is submitted through existing ApiCalls",
+      "members": [
+        "ApiProvider api()",
+        "ApiCalls calls()",
+        "SessionStore sessions()",
+        "void navigate(Route route, @Nullable String entityId)"
+      ],
+      "incomplete": [
+        "IC-20261122-C-UI-01 is PROPOSED; team public surface approval"
+      ]
+    },
+    {
+      "type": "edu.xjtlu.civa.feature.ac.inventory.InventoryFragment",
+      "kind": "class",
+      "owner": "AC/C",
+      "consumers": [
+        "app"
+      ],
+      "thread": "main",
+      "members": [
+        "InventoryFragment()"
+      ],
+      "incomplete": [
+        "IC-20261122-C-UI-01 is PROPOSED; device validation pending"
+      ]
+    },
+    {
       "type": "edu.xjtlu.civa.core.ui.Route",
       "kind": "enum",
       "owner": "EF/F",

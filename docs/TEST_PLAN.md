@@ -27,6 +27,81 @@
 
 ## Evidence
 
+### C frozen final source: taskc_version5
+
+Adds English whitespace/prefix ordering and food plural/category boundary tests.
+Android reports 47 tests with no failures (feature-ac 21), build and contract
+checks passed, lint 0 errors / 19 warnings. Python tool tests: 17 passed.
+The unchanged server database suite was not rerun. Full emulator UI regression
+was not rerun and the prior filter-transition failure remains recorded; the
+separate uninstalled filter-clearing draft is excluded. See
+[taskc_version5](c-history/taskc_version5.md) for exact commands and scope.
+
+
+### C ingredient grouping, units and shelves: taskc_version4
+
+InventoryGroupsTest adds five cases: 10+2 aggregation without source mutation,
+different IDs/units, exact decimals/unknown values, expired versus usable stock,
+and one card across locations. Presentation tests cover kg conversion, common
+fruit names and zero-stock visibility. Current Android 45, server 47, unit 18,
+candidate 4 and Python 17 reports have no failures. Lint has 0 errors and 19
+warnings. The guarded apple dictionary check passed in civa_v04_verification_test.
+Commands and the distinction between historical UI evidence and current checks
+are documented in [taskc_version4](c-history/taskc_version4.md).
+
+
+### C direct English ingredient entry: taskc_version3
+
+Added four real PostgreSQL HTTP cases for create/reuse, unit and membership
+checks, concurrent creation and canonical-name search. IngredientChoicesTest
+covers typed alias resolution, candidate deduplication and unit ambiguity.
+Current server 47, Android 35 and Python 17 reports have no failures; build and
+contract checks passed, lint 0 errors / 20 warnings. The count assertion for
+the new 42nd OpenAPI operation was updated with an explicit Inventory row check.
+Commands, historical screenshots and unexecuted UI checks are in
+[taskc_version3](c-history/taskc_version3.md).
+
+
+### C initial native fridge UI: taskc_version2
+
+Adds InventoryPresentationTest (four cases), native fridge fixtures and historical
+wide/narrow screenshots. The current revalidation and comparison with uploaded
+version 1 are maintained in [taskc_version2](c-history/taskc_version2.md).
+Android build/contract checks passed; local test reports total 30 cases with
+no failures (4 new AC presentation tests executed), lint 0 errors / 9 warnings.
+The unchanged server tests were not rerun for this UI-only restoration.
+Historical UI evidence is distinguished from the current build; no physical
+Xiaomi or new emulator click-through result is claimed.
+
+
+### C inventory backend verification (2026-11-21)
+
+`InventoryHttpIntegrationTest` exercises the existing generated routes through
+real authentication and PostgreSQL: alias search, active ingredients, pagination,
+separate batches, canonical units, expiry endpoints, metadata-only updates,
+quantity movements, household isolation, revoked access/replay, idempotency,
+stale concurrent writes, same-key concurrent requests, matching/allocation
+read-only behavior, and lock timeout rollback/retry.
+
+`InventoryRulesTest` and `InventoryCalculatorTest` cover decimal bounds,
+strict dates, rounding, full/partial/missing/unknown matching, untracked lines,
+expired/zero stock, and earliest-expiry/creation/ID allocation ordering.
+`IngredientNamesTest` includes Unicode length boundaries.
+
+The original C development run has 37 tests with no failures; the isolated unit task
+has 18 tests and the candidate contract task has 4 (tasks overlap).
+Commands, setup, limitations, and the proposed cooking integration are recorded
+in [C_HANDOFF.md](C_HANDOFF.md). No Android inventory UI or tablet validation
+is claimed by these backend tests.
+
+C-V01 revalidation against main `a0943b1` (2026-11-22): server 43 tests,
+isolated unit task 18, candidate contract task 4 and Android local tests 26
+all passed. Android assemble, all-module lint (0 errors, 2 existing app warnings),
+contract checks, 17 Python tests and the Windows launcher check passed.
+Commands and environment corrections are recorded in
+[c-history/C-V01-库存后端基础实现.md](c-history/C-V01-库存后端基础实现.md).
+No inventory UI or physical-tablet validation was performed for this backend version.
+
 Each pull request must list:
 
 - commands actually executed;

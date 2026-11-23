@@ -1,0 +1,15 @@
+<resources>
+    <item name="ac_cold_compartment" type="id" />
+    <item name="ac_frozen_compartment" type="id" />
+    <item name="ac_food_name" type="id" />
+    <item name="ac_quantity_input" type="id" />
+    <item name="ac_expiry_input" type="id" />
+    <item name="ac_location_input" type="id" />
+    <item name="ac_unit_input" type="id" />
+    <item name="ac_unit_g" type="id" />
+    <item name="ac_unit_kg" type="id" />
+    <item name="ac_unit_count" type="id" />
+    <item name="ac_unit_ml" type="id" />
+    <item name="ac_form_error" type="id" />
+    <item name="ac_recent_movement" type="id" />
+</resources>

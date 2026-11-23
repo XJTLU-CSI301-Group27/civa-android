@@ -14,7 +14,11 @@ class ContractIndexTest(unittest.TestCase):
         root = Path(__file__).resolve().parent.parent
         contract = load(root / 'contracts/openapi.json')
         text = render(contract)
-        self.assertEqual(41, sum(line.startswith('| ') for line in text.splitlines()) - 2)
+        self.assertEqual(42, sum(line.startswith('| ') for line in text.splitlines()) - 2)
+        self.assertIn(
+            '| createIngredient | POST | /api/v1/ingredients | C | '
+            'application/json: CreateIngredientRequest | '
+            '200 application/json: Ingredient; 201 application/json: Ingredient |', text)
         self.assertIn('multipart/form-data: object', text)
         self.assertIn('image/jpeg: binary, image/png: binary', text)
         self.assertIn('application/json: PlanSlot[]', text)

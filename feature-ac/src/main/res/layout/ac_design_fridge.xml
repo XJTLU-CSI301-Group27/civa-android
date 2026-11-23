@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Editor-only tools:text example; runtime inventory is rendered from the API. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="0dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:padding="4dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/ac_fridge_ink" android:padding="2dp" android:textSize="16sp" tools:text="冷藏室 · CHILL" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="2dp" android:textColor="@color/ac_fridge_ink" tools:text="蛋奶 · 每日补给" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:orientation="horizontal" android:background="@color/ac_fridge_inside" android:layout_weight="1">
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥛\n鲜牛奶\n3 瓶" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥚\n鸡蛋\n6 个" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥛\n酸奶\n2 瓶" />
+        </LinearLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="2dp" android:textColor="@color/ac_fridge_ink" tools:text="蔬菜 · 留住鲜绿" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:orientation="horizontal" android:background="@color/ac_fridge_inside" android:layout_weight="1">
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥬\n小白菜\n300 克" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🥦\n西兰花\n400 克" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🍅\n西红柿\n500 克" />
+        </LinearLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="2dp" android:textColor="@color/ac_fridge_ink" tools:text="水果 · 一点甜" />
+        <TextView android:layout_width="match_parent" android:layout_height="0dp" android:gravity="center" android:background="@color/ac_fridge_inside" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🍎  苹果 3个       🍊 橙子 4个" android:layout_weight="1" android:padding="2dp" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:padding="4dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp" android:textColor="@color/ac_fridge_ink" android:textSize="16sp" tools:text="冷冻室 · FREEZE" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:orientation="horizontal" android:background="@color/ac_fridge_inside" android:layout_weight="1">
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="16sp" tools:text="肉类储备\n\n🥩 牛肉 500克\n🥓 猪肉 350克\n🍖 羊肉 400克" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="16sp" tools:text="海鲜储备\n\n🦐 鲜虾 12个\n🐚 贝柱 8个" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
