@@ -27,11 +27,16 @@ final class IngredientChoices {
 
   List<Ingredient> search(String query) {
     String text = normalize(query);
-    if (text.isEmpty()) return Collections.emptyList();
+    if (text.codePointCount(0, text.length()) < 2) return Collections.emptyList();
     List<Ingredient> result = new ArrayList<>();
     for (var entry : choices.entrySet())
       if (terms.get(entry.getKey()).stream().anyMatch(term -> term.contains(text)))
         result.add(entry.getValue());
+    result.sort(
+        Comparator.comparingInt(
+                (Ingredient value) ->
+                    terms.get(key(value)).stream().anyMatch(term -> term.startsWith(text)) ? 0 : 1)
+            .thenComparing(value -> normalize(value.getName())));
     return result;
   }
 
@@ -54,13 +59,16 @@ final class IngredientChoices {
   static String label(Ingredient ingredient) {
     return ingredient.getName()
         + " · "
-        + InventoryPresentation.unit(ingredient.getUnit(), ingredient.getName());
+        + (ingredient.getUnit() == Unit.G ? "g" : ingredient.getUnit() == Unit.ML ? "ml" : "pcs");
   }
 
   static String normalize(String text) {
     return text == null
         ? ""
-        : Normalizer.normalize(text, Normalizer.Form.NFKC).trim().toLowerCase(Locale.ROOT);
+        : Normalizer.normalize(text, Normalizer.Form.NFKC)
+            .trim()
+            .replaceAll("\\s+", " ")
+            .toLowerCase(Locale.ROOT);
   }
 
   private static String key(Ingredient ingredient) {

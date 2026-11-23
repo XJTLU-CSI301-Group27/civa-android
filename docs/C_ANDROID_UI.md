@@ -1,6 +1,6 @@
 # C 初步原生冰箱界面
 
-当前开发阶段：taskc_version4。与第三版的逐项差异见 [版本记录](c-history/taskc_version4.md)。
+当前开发阶段：taskc_version5，采用已冻结的最终保留源码；相较第四版的差异及验证边界见 [版本记录](c-history/taskc_version5.md)。
 第二版初步前端说明保留在 [taskc_version2](c-history/taskc_version2.md)。
 
 ## 查看方式
@@ -51,6 +51,7 @@ InventoryFragment → InventoryViewModel → 共享 ApiCalls / InventoryApi → 
 python -m unittest discover -s scripts -p 'test_*.py'
 ```
 
-原阶段截图与本次验证见 [taskc_version4](c-history/taskc_version4.md)。
+原阶段分组截图见 [taskc_version4](c-history/taskc_version4.md)；第五版输入和提示变化见 [taskc_version5](c-history/taskc_version5.md)。
+本次没有重新安装运行；此前完整 UI 回归中的筛选切换检查未通过，不以构建和单元测试替代验收。
 旧版 `scripts/test_inventory_ui.py` 要求已安装本版 APK 的独立模拟器、后端及相同 `_test` 库。
 运行前必须确认目标设备和数据库；本次恢复未执行该脚本，不以历史截图替代当前 UI 回归。

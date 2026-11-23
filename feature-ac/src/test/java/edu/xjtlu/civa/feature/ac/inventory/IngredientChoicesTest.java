@@ -36,7 +36,7 @@ public class IngredientChoicesTest {
     IngredientChoices choices =
         new IngredientChoices(Arrays.asList(beef, tomato), Collections.emptySet());
     assertSame(beef, choices.exact("牛肉"));
-    assertSame(beef, choices.search("牛").get(0));
+    assertSame(beef, choices.search("牛肉").get(0));
     assertSame(beef, choices.exact("ＢＥＥＦ"));
     assertSame(tomato, choices.exact("番茄"));
   }
@@ -50,8 +50,21 @@ public class IngredientChoicesTest {
             Arrays.asList(duplicate, existing), Collections.singleton(existing.getId()));
     assertEquals(1, choices.search("牛肉").size());
     assertSame(existing, choices.exact("牛肉"));
-    assertEquals("牛肉 · 克", IngredientChoices.label(existing));
+    assertEquals("牛肉 · g", IngredientChoices.label(existing));
     assertTrue(choices.search("c_ui_").isEmpty());
+  }
+
+  @Test
+  public void englishSearchNormalizesSpacingAndRanksPrefixBeforeInfix() {
+    Ingredient prefix = food("Beef", Unit.G, "beef");
+    Ingredient infix = food("A smoked beef", Unit.G, "smoked beef");
+    Ingredient spaced = food("Fresh pear", Unit.COUNT, "fresh pear");
+    IngredientChoices choices =
+        new IngredientChoices(Arrays.asList(infix, spaced, prefix), Collections.emptySet());
+    assertTrue(choices.search("e").isEmpty());
+    assertSame(prefix, choices.search("be").get(0));
+    assertSame(spaced, choices.exact("  ＦＲＥＳＨ   PEAR  "));
+    assertEquals("Fresh pear · pcs", IngredientChoices.label(spaced));
   }
 
   @Test

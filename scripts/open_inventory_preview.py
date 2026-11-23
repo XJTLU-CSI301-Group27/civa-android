@@ -7,6 +7,7 @@ import subprocess
 import time
 import uuid
 import xml.etree.ElementTree as ET
+import zipfile
 
 
 def main():
@@ -62,7 +63,12 @@ def main():
         if re.search(r'\bmInputShown=true\b', adb('shell','dumpsys','input_method')):
             adb('shell','input','keyevent','4')
 
-    adb('install','-r',str(root/'app/build/outputs/apk/debug/app-debug.apk'))
+    apk=root/'app/build/outputs/apk/debug/app-debug.apk'
+    with zipfile.ZipFile(apk) as package:
+        dex=b''.join(package.read(name) for name in package.namelist() if re.fullmatch(r'classes[0-9]*\.dex',name))
+    if b'http://10.0.2.2:8080/' not in dex or b'http://10.0.2.2:8081/' in dex:
+        raise RuntimeError('Preview requires the 8080 APK; rebuild without CIVA_API_BASE_URL before opening the user emulator')
+    adb('install','-r',str(apk))
     adb('shell','am','force-stop','edu.xjtlu.civa')
     adb('shell','am','start','-W','-n','edu.xjtlu.civa/.MainActivity')
     fill('ef_username',session['username']);fill('ef_password',session['password'])

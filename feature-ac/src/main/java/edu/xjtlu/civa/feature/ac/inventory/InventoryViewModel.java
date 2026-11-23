@@ -516,7 +516,7 @@ final class InventoryViewModel extends ViewModel {
                     "INTERNAL_ERROR")
                 .contains(error.code)) {
               busy = false;
-              message = "提交结果待确认（" + error.code + "）。请使用原请求重试，避免重复扣减。";
+              message = errorText(error.code) + "。结果尚未确认，请核对后重试原操作，避免重复扣减。";
               changed();
             } else finish(write, error.code);
           }
@@ -737,7 +737,7 @@ final class InventoryViewModel extends ViewModel {
   static String errorText(String code) {
     return switch (code) {
       case "VERSION_CONFLICT" -> "库存已被其他成员修改，请以最新数量重新操作";
-      case "NETWORK_ERROR", "TIMEOUT" -> "连接失败，请确认后端已启动并检查网络";
+      case "NETWORK_ERROR", "TIMEOUT" -> "连接失败，请检查网络后重试";
       case "LOCAL_STORAGE_ERROR" -> "本地记录不可用，本次没有继续提交";
       case "HOUSEHOLD_ACCESS_REVOKED" -> "你已失去该家庭的访问权限";
       case "HOUSEHOLD_REQUIRED" -> "请先创建或加入家庭";
@@ -745,7 +745,7 @@ final class InventoryViewModel extends ViewModel {
       case "INGREDIENT_INACTIVE" -> "该食材已停用，请维护食材资料后再录入";
       case "NAME_CONFLICT" -> "食材名称已被其他成员录入，请刷新后重试";
       case "VALIDATION_ERROR" -> "输入未通过服务器校验";
-      default -> "请求未完成：" + code;
+      default -> "操作未完成，请稍后重试";
     };
   }
 

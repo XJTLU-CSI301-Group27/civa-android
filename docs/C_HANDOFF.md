@@ -2,6 +2,12 @@
 
 更新：2026-11-22，Asia/Shanghai。记录 C-V01 后端实现、接入及验证。
 
+## taskc_version5：最终保留源码
+
+保留冻结源码中的输入、搜索排序、分类与提示优化；详情见 [taskc_version5](c-history/taskc_version5.md)。
+本次构建通过，Android 47 项报告无失败，lint 无错误、19 条警告。此前完整 UI 回归的筛选切换检查未通过记录仍保留，
+未加入主目录的筛选清空草稿，也未重新安装 APK。五阶段索引见 [版本记录](c-history/README.md)。
+
 ## taskc_version4：汇总、单位与分类
 
 同标准食材与单位合并卡片，详情保留各批日期；数量同行 g / kg / pcs、常见食材分区、用尽确认及零库存隐藏。

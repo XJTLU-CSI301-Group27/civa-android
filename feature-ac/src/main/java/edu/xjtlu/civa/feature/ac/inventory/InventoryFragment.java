@@ -181,9 +181,10 @@ public final class InventoryFragment extends Fragment {
 
   private void render() {
     if (binding == null) return;
-    binding.acMessage.setText(model.message);
+    String visibleMessage = model.message.replaceAll("(?m)^已读取 [^\\n]*\\n?", "").trim();
+    binding.acMessage.setText(visibleMessage);
     binding.acMessage.setVisibility(
-        model.message.isEmpty()
+        visibleMessage.isEmpty()
                 || model.message.startsWith("已读取 ")
                 || model.message.startsWith("当前筛选下暂无库存")
             ? View.GONE
@@ -883,6 +884,7 @@ public final class InventoryFragment extends Fragment {
     }
     units.setOnCheckedStateChangeListener(
         (group, ids) -> {
+          clearFormValidation(form);
           model.draftUnitIndex = ids.isEmpty() ? 0 : (int) group.findViewById(ids.get(0)).getTag();
           Unit base = InventoryPresentation.inputBaseUnit(model.draftUnitIndex);
           units.setContentDescription(
@@ -904,6 +906,7 @@ public final class InventoryFragment extends Fragment {
           @Override
           public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
             model.draftLocation = pos;
+            clearFormValidation(form);
           }
 
           @Override
@@ -917,7 +920,9 @@ public final class InventoryFragment extends Fragment {
             model.draftUnitIndex = standard == Unit.G ? 1 : standard == Unit.COUNT ? 2 : 3;
           String typed = picker.getText().toString().toLowerCase(Locale.ROOT);
           boolean liquid =
-              standard == Unit.ML || typed.matches(".*\\b(water|juice|oil|vinegar|sauce)\\b.*");
+              standard == Unit.ML
+                  || model.draftUnitIndex == 3
+                  || typed.matches(".*\\b(water|juice|oil|vinegar|sauce)\\b.*");
           int selectedChoice = model.draftUnitIndex;
           for (int i = 0; i < unitChoices.length; i++) {
             Chip chip = units.findViewById(unitIds[i]);
@@ -956,7 +961,9 @@ public final class InventoryFragment extends Fragment {
         () -> {
           matches.removeAllViews();
           String query = picker.getText().toString();
-          if (query.trim().isEmpty()) return;
+          if (IngredientChoices.normalize(query)
+                  .codePointCount(0, IngredientChoices.normalize(query).length())
+              < 2) return;
           if (choices.exact(query) != null) return;
           List<Ingredient> results = choices.search(query);
           if (results.isEmpty()) {
@@ -965,23 +972,34 @@ public final class InventoryFragment extends Fragment {
           }
           for (Ingredient item : results.subList(0, Math.min(3, results.size()))) {
             MaterialButton candidate = button(IngredientChoices.label(item), true);
+            candidate.setLetterSpacing(0);
+            candidate.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+            candidate.setMaxLines(1);
+            candidate.setEllipsize(android.text.TextUtils.TruncateAt.END);
             candidate.setOnClickListener(v -> choose.accept(item));
             matches.addView(candidate, new LinearLayout.LayoutParams(-1, dp(44)));
           }
-          if (results.size() > 3) matches.addView(plainText("继续输入名称可缩小范围。", 12));
         };
     watch(
         picker,
         value -> {
           boolean different = !Objects.equals(model.draftName, value);
+          int oldSuggestion = InventoryPresentation.suggestedShelf(model.draftName);
+          boolean semanticChange =
+              !IngredientChoices.normalize(model.draftName)
+                  .equals(IngredientChoices.normalize(value));
+          Ingredient previous = selected[0];
           model.draftName = value;
           if (choosing[0]) return;
           Ingredient exact = choices.exact(value);
-          if (different && !value.trim().isEmpty())
-            location.setSelection(
-                InventoryPresentation.suggestedShelf(exact == null ? value : exact.getName()));
+          if (semanticChange && !value.trim().isEmpty()) {
+            int suggestion =
+                InventoryPresentation.suggestedShelf(exact == null ? value : exact.getName());
+            if (location.getSelectedItemPosition() == oldSuggestion || suggestion != oldSuggestion)
+              location.setSelection(suggestion);
+          }
           selected[0] = exact;
-          if (different && exact == null) model.draftUnitIndex = 0;
+          if (different && exact == null && previous != null) model.draftUnitIndex = 0;
           updateUnit.run();
           showMatches.run();
         });
@@ -995,6 +1013,7 @@ public final class InventoryFragment extends Fragment {
         form,
         () -> {
           String typed = picker.getText().toString();
+          if (typed.trim().isEmpty()) throw new IllegalArgumentException("请输入食材名称");
           Ingredient ingredient = selected[0];
           if (ingredient == null
               || !IngredientChoices.normalize(typed)
@@ -1172,6 +1191,7 @@ public final class InventoryFragment extends Fragment {
     validation.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     validation.setVisibility(View.GONE);
     form.addView(validation);
+    clearValidationOnEdit(form, form);
     ScrollView scroll = new ScrollView(requireContext());
     scroll.addView(form);
     var dialog =
@@ -1198,6 +1218,25 @@ public final class InventoryFragment extends Fragment {
     dialog.setOnDismissListener(ignored -> dialogs.remove(dialog));
     dialog.show();
     return dialog;
+  }
+
+  private void clearFormValidation(View form) {
+    View error = form.findViewById(R.id.ac_form_error);
+    if (error != null) error.setVisibility(View.GONE);
+  }
+
+  private void clearValidationOnEdit(View view, View form) {
+    if (view instanceof EditText edit) {
+      watch(
+          edit,
+          ignored -> {
+            edit.setError(null);
+            clearFormValidation(form);
+          });
+    } else if (view instanceof ViewGroup group) {
+      for (int i = 0; i < group.getChildCount(); i++)
+        clearValidationOnEdit(group.getChildAt(i), form);
+    }
   }
 
   private Spinner location(LinearLayout form, int selected) {

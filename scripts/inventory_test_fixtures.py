@@ -7,7 +7,16 @@ import subprocess
 import uuid
 
 
-def cleanup_ephemeral_foods(sql, owner, home, ingredients):
+def owned_ephemeral_foods(sql, owner):
+    owner = str(uuid.UUID(owner))
+    return json.loads(sql("SELECT coalesce(jsonb_agg(DISTINCT i.id),'[]'::jsonb)::text "
+                          "FROM ingredients i JOIN idempotency_requests r ON r.response_body->>'id'=i.id::text "
+                          "JOIN users u ON u.id=r.actor_id WHERE r.actor_id='"+owner+"' AND r.http_status=201 "
+                          "AND r.response_body->>'name'=i.name AND u.username ~ '^c_ui_[a-z0-9]+$' "
+                          "AND i.name ~ '^(fresh pear|oat flakes) [0-9a-f]{8}$'"))
+
+
+def cleanup_ephemeral_foods(sql, owner, home, ingredients, *, untouched_only=False):
     if not sql('SELECT current_database()').endswith('_test'):
         raise RuntimeError('Fixture cleanup requires an explicitly isolated *_test database')
     owner = str(uuid.UUID(owner))
@@ -17,6 +26,20 @@ def cleanup_ephemeral_foods(sql, owner, home, ingredients):
     removed, retained = [], []
     for value in ingredients:
         ingredient = str(uuid.UUID(value))
+        untouched_guard = ""
+        if untouched_only:
+            untouched_guard = """
+  PERFORM 1 FROM inventory_batches WHERE ingredient_id='%s' FOR UPDATE;
+  IF EXISTS (SELECT 1 FROM inventory_batches b JOIN ingredients i ON i.id=b.ingredient_id
+    WHERE i.id='%s' AND (b.version<>1 OR NOT
+      ((i.name LIKE 'oat flakes %%' AND b.quantity=75 AND b.unit='G') OR
+       (i.name LIKE 'fresh pear %%' AND b.quantity=2 AND b.unit='COUNT')) OR
+      NOT EXISTS (SELECT 1 FROM idempotency_requests r WHERE r.actor_id='%s' AND r.http_status=201
+        AND r.response_body->>'id'=b.id::text AND r.response_body->>'ingredientId'=i.id::text)))
+    OR EXISTS (SELECT 1 FROM inventory_movements m JOIN inventory_batches b ON b.id=m.batch_id
+               WHERE b.ingredient_id='%s')
+  THEN RETURN; END IF;
+""" % (ingredient, ingredient, owner, ingredient)
         sql("""BEGIN;
 DO $cleanup$
 BEGIN
@@ -27,6 +50,7 @@ BEGIN
     RAISE EXCEPTION 'Fixture actor/household not verified';
   END IF;
   PERFORM 1 FROM ingredients WHERE id='%s' FOR UPDATE;
+  %s
   IF NOT EXISTS (
     SELECT 1 FROM ingredients i JOIN idempotency_requests r
       ON r.response_body->>'id'=i.id::text AND r.response_body->>'name'=i.name
@@ -46,7 +70,7 @@ BEGIN
   DELETE FROM idempotency_requests WHERE actor_id='%s'
     AND (response_body->>'id'='%s' OR response_body->>'ingredientId'='%s');
 END $cleanup$;
-COMMIT;""" % (ingredient, owner, home, ingredient, ingredient, owner, ingredient, home,
+COMMIT;""" % (ingredient, owner, home, ingredient, untouched_guard, ingredient, owner, ingredient, home,
               ingredient, ingredient, home, ingredient, home, ingredient, home,
               ingredient, ingredient, owner, ingredient, ingredient))
         target = removed if sql("SELECT count(*) FROM ingredients WHERE id='"+ingredient+"'") == '0' else retained

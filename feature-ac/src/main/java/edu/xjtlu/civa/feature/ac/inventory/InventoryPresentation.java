@@ -28,7 +28,11 @@ final class InventoryPresentation {
     } catch (NumberFormatException error) {
       throw new IllegalArgumentException("数量格式不正确");
     }
-    return QuantityInputs.toBase(value, "G").amount;
+    try {
+      return QuantityInputs.toBase(value, "G").amount;
+    } catch (IllegalArgumentException overflow) {
+      throw new IllegalArgumentException("数量超出允许范围，请减小后重试");
+    }
   }
 
   static String positiveQuantity(String raw) {
@@ -64,19 +68,28 @@ final class InventoryPresentation {
     Unit base = inputBaseUnit(choice);
     if (base == null) throw new IllegalArgumentException("请选择数量右侧的单位");
     BigDecimal value = new BigDecimal(positiveQuantity(raw));
-    return number(QuantityInputs.toBase(value, choice == 4 ? "KG" : base.getValue()).amount);
+    try {
+      return number(QuantityInputs.toBase(value, choice == 4 ? "KG" : base.getValue()).amount);
+    } catch (IllegalArgumentException overflow) {
+      throw new IllegalArgumentException("换算后的数量过大，请减小后重试");
+    }
   }
 
   static int suggestedShelf(String name) {
     String english = name.toLowerCase(Locale.ROOT);
     if (name.contains("奶")
         || name.contains("蛋")
-        || english.matches(".*\\b(milk|egg|eggs|yogurt|yoghurt)\\b.*")) return 0;
+        || english.matches(
+            ".*\\b(milk|egg|eggs|yogurt|yoghurt|cheese|butter|cream|water|juice)\\b.*")) return 0;
     if (name.contains("虾")
         || name.contains("贝")
         || name.contains("鱼")
-        || english.matches(".*\\b(shrimp|prawn|fish|scallop|scallops)\\b.*")) return 4;
-    if (name.contains("肉") || english.matches(".*\\b(beef|pork|lamb|mutton|chicken|meat)\\b.*"))
+        || english.matches(
+            ".*\\b(shrimp|shrimps|prawn|prawns|fish|salmon|tuna|cod|crab|crabs|lobster|lobsters|scallop|scallops)\\b.*"))
+      return 4;
+    if (name.contains("肉")
+        || english.matches(
+            ".*\\b(beef|pork|lamb|mutton|chicken|duck|turkey|meat|bacon|ham|steak|sausage|sausages)\\b.*"))
       return 3;
     if (name.contains("苹果")
         || name.contains("梨")
@@ -157,7 +170,13 @@ final class InventoryPresentation {
     if (name.contains("肉")) return "🥩";
     if (name.contains("鱼")) return "🐟";
     if (name.contains("贝")) return "🐚";
-    return suggestedShelf(name) == 2 ? "🍉" : "🥬";
+    return switch (suggestedShelf(name)) {
+      case 0 -> "🥛";
+      case 2 -> "🍉";
+      case 3 -> "🥩";
+      case 4 -> "🐟";
+      default -> "🥬";
+    };
   }
 
   static String expiry(InventoryBatch batch, LocalDate today) {

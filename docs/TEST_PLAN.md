@@ -27,6 +27,17 @@
 
 ## Evidence
 
+### C frozen final source: taskc_version5
+
+Adds English whitespace/prefix ordering and food plural/category boundary tests.
+Android reports 47 tests with no failures (feature-ac 21), build and contract
+checks passed, lint 0 errors / 19 warnings. Python tool tests: 17 passed.
+The unchanged server database suite was not rerun. Full emulator UI regression
+was not rerun and the prior filter-transition failure remains recorded; the
+separate uninstalled filter-clearing draft is excluded. See
+[taskc_version5](c-history/taskc_version5.md) for exact commands and scope.
+
+
 ### C ingredient grouping, units and shelves: taskc_version4
 
 InventoryGroupsTest adds five cases: 10+2 aggregation without source mutation,

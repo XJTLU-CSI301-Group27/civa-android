@@ -19,7 +19,7 @@ import urllib.request
 import uuid
 import xml.etree.ElementTree as ET
 from seed_inventory_demo_catalog import CATALOG, ensure_catalog
-from inventory_test_fixtures import cleanup_ephemeral_foods
+from inventory_test_fixtures import cleanup_ephemeral_foods, owned_ephemeral_foods
 
 
 def main():
@@ -44,6 +44,9 @@ def main():
     if args.grouping_only and (args.add_only or args.depletion_only or args.replenishment_only or args.keep_fixtures):
         raise RuntimeError('--grouping-only runs independently and always cleans its synthetic fixtures')
     root = Path(__file__).resolve().parents[1]
+    preview_session=root/'build/c-ui-smoke/studio-preview-session.json'
+    if preview_session.exists() and json.loads(preview_session.read_text(encoding='utf-8')).get('database')==args.test_db:
+        raise RuntimeError('Automated regression must use a separate database from the user-visible Studio preview')
     output = root / 'docs/verification/screenshots'
     output.mkdir(parents=True, exist_ok=True)
     work = root / 'build/c-ui-smoke'
@@ -224,6 +227,36 @@ def main():
             return Decimal(sql("SELECT quantity::text FROM inventory_batches WHERE id='"+batch+"'"))
         def count():
             return int(sql("SELECT count(*) FROM inventory_batches WHERE household_id='"+home+"'"))
+        def verify_clean_entry():
+            before=count()
+            tap(wait(resource='ac_add'));tap(wait(text='确认保存'));wait(text='请输入食材名称')
+            replace(wait(resource='ac_food_name'),'e')
+            tree=screen()
+            if find(tree,resource='ac_form_error') is not None or any(re.search(r' [·] (g|ml|pcs)$', n.get('text','')) for n in tree.iter('node')):
+                raise RuntimeError('A single typed letter shows noisy suggestions or stale validation')
+            replace(wait(resource='ac_food_name'),'be');wait(text='牛肉 · g')
+            replace(wait(resource='ac_food_name'),'beef');wait(description='单位：克')
+            replace(wait(resource='ac_food_name'),'pantry spice');wait(description='尚未选择单位')
+            tap(wait(resource='ac_unit_g'))
+            tap(wait(resource='ac_location_input'));tap(wait(text='冷冻 · 肉类抽屉'))
+            replace(wait(resource='ac_food_name'),'pantry spice mix')
+            if wait(resource='ac_unit_g').get('checked')!='true':
+                raise RuntimeError('Editing an unknown English name discarded the explicitly chosen unit')
+            wait(text='冷冻 · 肉类抽屉')
+            replace(wait(resource='ac_food_name'),'pear');wait(text='冷藏 · 水果层')
+            replace(wait(resource='ac_food_name'),'water');tap(wait(resource='ac_unit_ml'))
+            replace(wait(resource='ac_food_name'),'spring water')
+            if wait(resource='ac_unit_ml').get('checked')!='true':
+                raise RuntimeError('Editing a liquid name hid or lost the explicit ml selection')
+            replace(wait(resource='ac_food_name'),'beef');wait(description='单位：克')
+            tap(wait(resource='ac_unit_kg'));replace(wait(resource='ac_quantity_input'),'999999999999999')
+            tap(wait(text='确认保存'));wait(text='换算后的数量过大，请减小后重试')
+            replace(wait(resource='ac_quantity_input'),'0.5')
+            if find(screen(),resource='ac_form_error') is not None:
+                raise RuntimeError('Correcting input did not clear the stale error')
+            tap(wait(text='取消'))
+            if count()!=before: raise RuntimeError('Entry polish checks wrote inventory without confirming valid input')
+            print('PASS: clean English candidates, prefix ranking, no one-letter noise, name-first validation, sticky explicit unit/location, ml edit, readable overflow errors and cancellation',flush=True)
         def select_food_batch(name, batch):
             tap(wait(text=name))
             tree=screen()
@@ -421,6 +454,7 @@ def main():
             print('SETUP: addition-only balances prepared through API; consumption cases are not rerun',flush=True)
         else:
             tap(wait(resource='ac_refresh')); time.sleep(1)
+            verify_clean_entry()
             fit_fridge(); capture('c-fridge-closed-wide.png')
             tap(wait(description='打开冷藏门')); wait(text='鲜牛奶')
             wait(description='打开冷冻门')
@@ -601,6 +635,8 @@ def main():
             kept=True
         print('PASS: '+('addition/edit/layout checks' if args.add_only else 'all demo inventory checks')+' completed against native app and real isolated database', flush=True)
     finally:
+        if home and not kept:
+            dictionary=list(set(dictionary) | set(owned_ephemeral_foods(sql,owner)))
         if home and dictionary and not kept:
             cleanup_ephemeral_foods(sql, owner, home, dictionary)
             dictionary=[]

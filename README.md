@@ -2,7 +2,7 @@
 
 本地 C 库存模块状态与使用说明：[C 开发与验证交接](docs/C_HANDOFF.md)。
 库存后端已接入初步原生冰箱页面；最终做饭扣减接入仍未完成。
-开发记录：[taskc_version2](docs/c-history/taskc_version2.md)、[taskc_version3](docs/c-history/taskc_version3.md)、[taskc_version4](docs/c-history/taskc_version4.md)。
+开发记录：[C 库存五版索引](docs/c-history/README.md)。最终保留源码与验证限制见 [taskc_version5](docs/c-history/taskc_version5.md)。
 
 CSI301 Android group project for household recipes, meal planning, inventory,
 cooking records, personal meal logs, and shared household access.

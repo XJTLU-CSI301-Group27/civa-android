@@ -11,6 +11,17 @@ import org.junit.Test;
 
 public class InventoryPresentationTest {
   @Test
+  public void commonEnglishFoodsAndPluralsUseTheExpectedCategoryWithoutSubstringMistakes() {
+    assertEquals(0, InventoryPresentation.suggestedShelf("cheese"));
+    assertEquals(0, InventoryPresentation.suggestedShelf("spring water"));
+    assertEquals(4, InventoryPresentation.suggestedShelf("prawns"));
+    assertEquals(4, InventoryPresentation.suggestedShelf("salmon"));
+    assertEquals(3, InventoryPresentation.suggestedShelf("sausages"));
+    assertEquals(1, InventoryPresentation.suggestedShelf("eggplant"));
+    assertEquals("🐟", InventoryPresentation.emoji("salmon"));
+  }
+
+  @Test
   public void fridgeHidesOnlyEmptyStockAndPreservesUnknown() {
     assertFalse(InventoryPresentation.inFridge(new InventoryBatch().quantity("0")));
     assertFalse(InventoryPresentation.inFridge(new InventoryBatch().quantity("0.000")));
