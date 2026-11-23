@@ -37,6 +37,36 @@ final class InventoryPresentation {
     return number(value);
   }
 
+  static boolean inFridge(InventoryBatch batch) {
+    // Unknown must stay unknown, rather than being silently classified as empty.
+    return batch.getQuantity() == null || quantity(batch.getQuantity()).signum() > 0;
+  }
+
+  static boolean otherBatchesRemain(InventoryBatch target, Iterable<InventoryBatch> batches) {
+    for (InventoryBatch batch : batches)
+      if (!batch.getId().equals(target.getId())
+          && batch.getIngredientId().equals(target.getIngredientId())
+          && inFridge(batch)) return true;
+    return false;
+  }
+
+  // Input-only choices; the shared API still stores G / COUNT / ML.
+  static Unit inputBaseUnit(int choice) {
+    return switch (choice) {
+      case 1, 4 -> Unit.G;
+      case 2 -> Unit.COUNT;
+      case 3 -> Unit.ML;
+      default -> null;
+    };
+  }
+
+  static String inputQuantity(String raw, int choice) {
+    Unit base = inputBaseUnit(choice);
+    if (base == null) throw new IllegalArgumentException("请选择数量右侧的单位");
+    BigDecimal value = new BigDecimal(positiveQuantity(raw));
+    return number(QuantityInputs.toBase(value, choice == 4 ? "KG" : base.getValue()).amount);
+  }
+
   static int suggestedShelf(String name) {
     String english = name.toLowerCase(Locale.ROOT);
     if (name.contains("奶")
@@ -49,9 +79,16 @@ final class InventoryPresentation {
     if (name.contains("肉") || english.matches(".*\\b(beef|pork|lamb|mutton|chicken|meat)\\b.*"))
       return 3;
     if (name.contains("苹果")
+        || name.contains("梨")
+        || name.contains("香蕉")
+        || name.contains("葡萄")
         || name.contains("橙")
         || name.contains("橘")
-        || english.matches(".*\\b(apple|apples|orange|oranges|fruit)\\b.*")) return 2;
+        || english.matches(
+            ".*\\b(apple|apples|pear|pears|banana|bananas|grape|grapes|peach|peaches|"
+                + "orange|oranges|lemon|lemons|lime|limes|kiwi|kiwis|mango|mangoes|mangos|"
+                + "strawberry|strawberries|blueberry|blueberries|cherry|cherries|"
+                + "watermelon|melon|pineapple|plum|plums|fruit)\\b.*")) return 2;
     return 1;
   }
 
@@ -106,6 +143,9 @@ final class InventoryPresentation {
     if (english.matches(".*\\b(shrimp|prawn)\\b.*")) return "🦐";
     if (english.matches(".*\\b(fish|scallop|scallops)\\b.*")) return "🐟";
     if (english.matches(".*\\b(apple|apples)\\b.*")) return "🍎";
+    if (english.matches(".*\\b(pear|pears)\\b.*") || name.contains("梨")) return "🍐";
+    if (english.matches(".*\\b(banana|bananas)\\b.*") || name.contains("香蕉")) return "🍌";
+    if (english.matches(".*\\b(grape|grapes)\\b.*") || name.contains("葡萄")) return "🍇";
     if (english.matches(".*\\b(orange|oranges)\\b.*")) return "🍊";
     if (name.contains("虾")) return "🦐";
     if (name.contains("蛋")) return "🥚";
@@ -117,7 +157,7 @@ final class InventoryPresentation {
     if (name.contains("肉")) return "🥩";
     if (name.contains("鱼")) return "🐟";
     if (name.contains("贝")) return "🐚";
-    return "🥬";
+    return suggestedShelf(name) == 2 ? "🍉" : "🥬";
   }
 
   static String expiry(InventoryBatch batch, LocalDate today) {

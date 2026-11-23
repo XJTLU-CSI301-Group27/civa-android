@@ -17,6 +17,19 @@ public class IngredientChoicesTest {
   }
 
   @Test
+  public void appleCountAliasesDoNotRelabelHistoricalGramStock() {
+    Ingredient grams = food("苹果（按克）", Unit.G);
+    Ingredient items = food("苹果", Unit.COUNT, "apple", "apples");
+    IngredientChoices choices =
+        new IngredientChoices(Arrays.asList(grams, items), Collections.singleton(grams.getId()));
+    assertSame(items, choices.exact("apple"));
+    assertSame(items, choices.exact("apples"));
+    assertSame(items, choices.exact("苹果"));
+    assertSame(grams, choices.exact("苹果（按克）"));
+    assertEquals(Unit.G, grams.getUnit());
+  }
+
+  @Test
   public void chineseNameAndAliasFindOneCanonicalChoice() {
     Ingredient beef = food("牛肉", Unit.G, "beef");
     Ingredient tomato = food("西红柿", Unit.G, "番茄");

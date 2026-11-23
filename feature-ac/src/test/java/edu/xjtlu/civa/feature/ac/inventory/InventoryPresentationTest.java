@@ -5,9 +5,64 @@ import static org.junit.Assert.*;
 import edu.xjtlu.civa.api.model.InventoryBatch;
 import edu.xjtlu.civa.api.model.Unit;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.UUID;
 import org.junit.Test;
 
 public class InventoryPresentationTest {
+  @Test
+  public void fridgeHidesOnlyEmptyStockAndPreservesUnknown() {
+    assertFalse(InventoryPresentation.inFridge(new InventoryBatch().quantity("0")));
+    assertFalse(InventoryPresentation.inFridge(new InventoryBatch().quantity("0.000")));
+    assertTrue(InventoryPresentation.inFridge(new InventoryBatch().quantity("0.001")));
+    assertTrue(InventoryPresentation.inFridge(new InventoryBatch()));
+  }
+
+  @Test
+  public void depletionOnlyAppliesToSelectedBatchOfTheSameIngredient() {
+    UUID food = UUID.randomUUID();
+    InventoryBatch current =
+        new InventoryBatch().id(UUID.randomUUID()).ingredientId(food).quantity("3");
+    InventoryBatch empty =
+        new InventoryBatch().id(UUID.randomUUID()).ingredientId(food).quantity("0");
+    InventoryBatch other =
+        new InventoryBatch().id(UUID.randomUUID()).ingredientId(food).quantity("2");
+    InventoryBatch different =
+        new InventoryBatch().id(UUID.randomUUID()).ingredientId(UUID.randomUUID()).quantity("10");
+    assertFalse(
+        InventoryPresentation.otherBatchesRemain(
+            current, Arrays.asList(current, empty, different)));
+    assertTrue(InventoryPresentation.otherBatchesRemain(current, Arrays.asList(current, other)));
+    assertTrue(
+        InventoryPresentation.otherBatchesRemain(
+            current, Arrays.asList(current, other.quantity(null))));
+  }
+
+  @Test
+  public void entryUnitsConvertKilogramsWithoutConvertingCountToWeight() {
+    assertEquals(Unit.G, InventoryPresentation.inputBaseUnit(4));
+    assertEquals(Unit.COUNT, InventoryPresentation.inputBaseUnit(2));
+    assertEquals(Unit.ML, InventoryPresentation.inputBaseUnit(3));
+    assertEquals("1250", InventoryPresentation.inputQuantity("1.25", 4));
+    assertEquals("1", InventoryPresentation.inputQuantity("0.001", 4));
+    assertEquals("200", InventoryPresentation.inputQuantity("200", 1));
+    assertEquals("3", InventoryPresentation.inputQuantity("3", 2));
+    assertThrows(IllegalArgumentException.class, () -> InventoryPresentation.inputQuantity("1", 0));
+    assertThrows(IllegalArgumentException.class, () -> InventoryPresentation.inputQuantity("0", 4));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> InventoryPresentation.inputQuantity("999999999999999", 4));
+  }
+
+  @Test
+  public void englishFruitNamesUseFruitShelfAndPearIllustration() {
+    for (String name :
+        new String[] {"pear", "PEARS", "fresh pear", "banana", "grapes", "mango", "strawberries"})
+      assertEquals(2, InventoryPresentation.suggestedShelf(name));
+    assertEquals("🍐", InventoryPresentation.emoji("pear"));
+    assertEquals(1, InventoryPresentation.suggestedShelf("pearl barley"));
+  }
+
   @Test
   public void consumptionUsesExactDecimalsAndCannotOverdraw() {
     assertEquals("350", InventoryPresentation.after("500", "150"));

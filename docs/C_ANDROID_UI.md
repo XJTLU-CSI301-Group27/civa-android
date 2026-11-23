@@ -1,6 +1,6 @@
 # C 初步原生冰箱界面
 
-当前开发阶段：taskc_version3。与第二版的逐项差异见 [版本记录](c-history/taskc_version3.md)。
+当前开发阶段：taskc_version4。与第三版的逐项差异见 [版本记录](c-history/taskc_version4.md)。
 第二版初步前端说明保留在 [taskc_version2](c-history/taskc_version2.md)。
 
 ## 查看方式
@@ -22,13 +22,17 @@
 - 添加库存、消耗、丢弃、修正和编辑资料通过真实 InventoryApi 保存。
 - 消耗显示预计余额；只有服务端成功后才刷新为新余额。
 - 全部、未过期、临期、已过期筛选采用服务端规则。
-- 不同批次分别显示，用尽批次仍可显示 0。
+- 同标准食材与单位合并为一张卡片；点开查看并选择不同入库日期、到期日的批次。
+- 最后一次消耗先确认或返回修改；确认归零后在冰箱隐藏，后台批次和记录保留。
+- 用尽后补货选中新批次，汇总数量随服务器余额刷新。
 - 添加入口解释无家庭、加载和待确认状态；英文名称可直接输入，候选只辅助查找。
 - 完整冰箱占首屏，上下等高，宽屏详情并排、窄屏独立详情。
 
 ## 单位和数据
 
-G 显示克，ML 显示毫升，COUNT 通常显示个，COUNT 奶类显示瓶；不推测瓶数与毫升转换。
+数量输入同行提供 g / kg / pcs，液体场景另提供 ml；kg 换算到 G。
+单位默认复用已匹配的标准食材；COUNT 苹果选 pcs，G 牛肉选 g，未知食材明确选择，不把旧 G 改成 COUNT。
+卡片 G 显示克、ML 显示毫升、COUNT 通常显示个，COUNT 奶类显示瓶；不推测瓶数与毫升转换。
 已有食材唯一匹配后复用标准 ID 与单位；未收录英文名称选择单位后经 createIngredient 创建并录入库存。
 同名不同单位需明确选择，不自动改写旧库存。
 入库时间使用服务端 createdAt，到期日允许未知。
@@ -47,6 +51,6 @@ InventoryFragment → InventoryViewModel → 共享 ApiCalls / InventoryApi → 
 python -m unittest discover -s scripts -p 'test_*.py'
 ```
 
-原阶段截图与本次验证见 [taskc_version3](c-history/taskc_version3.md)。
+原阶段截图与本次验证见 [taskc_version4](c-history/taskc_version4.md)。
 旧版 `scripts/test_inventory_ui.py` 要求已安装本版 APK 的独立模拟器、后端及相同 `_test` 库。
 运行前必须确认目标设备和数据库；本次恢复未执行该脚本，不以历史截图替代当前 UI 回归。

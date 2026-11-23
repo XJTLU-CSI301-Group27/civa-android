@@ -196,7 +196,13 @@ final class InventoryViewModel extends ViewModel {
           if ((long) (page + 1) * 100 < value.getTotal()) loadBatches(page + 1, generation, result);
           else {
             batches.clear();
-            batches.addAll(result);
+            for (InventoryBatch batch : result)
+              if (InventoryPresentation.inFridge(batch)) batches.add(batch);
+            if (selected() == null) {
+              selectedId = null;
+              latestMovement = null;
+              movementMessage = "";
+            }
             loading = false;
             message =
                 (outcome.isEmpty() ? "" : outcome + "\n")

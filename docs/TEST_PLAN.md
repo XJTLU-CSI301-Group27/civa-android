@@ -27,6 +27,18 @@
 
 ## Evidence
 
+### C ingredient grouping, units and shelves: taskc_version4
+
+InventoryGroupsTest adds five cases: 10+2 aggregation without source mutation,
+different IDs/units, exact decimals/unknown values, expired versus usable stock,
+and one card across locations. Presentation tests cover kg conversion, common
+fruit names and zero-stock visibility. Current Android 45, server 47, unit 18,
+candidate 4 and Python 17 reports have no failures. Lint has 0 errors and 19
+warnings. The guarded apple dictionary check passed in civa_v04_verification_test.
+Commands and the distinction between historical UI evidence and current checks
+are documented in [taskc_version4](c-history/taskc_version4.md).
+
+
 ### C direct English ingredient entry: taskc_version3
 
 Added four real PostgreSQL HTTP cases for create/reuse, unit and membership

@@ -16,7 +16,7 @@
             <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🍅\n西红柿\n500 克" />
         </LinearLayout>
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="2dp" android:textColor="@color/ac_fridge_ink" tools:text="水果 · 一点甜" />
-        <TextView android:layout_width="match_parent" android:layout_height="0dp" android:gravity="center" android:background="@color/ac_fridge_inside" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🍎  苹果 450克       🍊 橙子 4个" android:layout_weight="1" android:padding="2dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="0dp" android:gravity="center" android:background="@color/ac_fridge_inside" android:textColor="@color/ac_fridge_ink" android:textSize="17sp" tools:text="🍎  苹果 3个       🍊 橙子 4个" android:layout_weight="1" android:padding="2dp" />
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:padding="4dp">
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp" android:textColor="@color/ac_fridge_ink" android:textSize="16sp" tools:text="冷冻室 · FREEZE" />

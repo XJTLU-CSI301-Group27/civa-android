@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -42,6 +43,7 @@ public final class InventoryFragment extends Fragment {
   private LinearLayout sheetDetail;
   private int workspaceHeight, workspaceWidth;
   private String presentedId;
+  private List<InventoryGroups.Group> foodGroups = Collections.emptyList();
 
   public InventoryFragment() {
     super(R.layout.ac_fragment_inventory);
@@ -214,8 +216,10 @@ public final class InventoryFragment extends Fragment {
         new LinearLayout.LayoutParams(dp(270), ViewGroup.LayoutParams.MATCH_PARENT);
     detailParams.leftMargin = dp(8);
     binding.acDetailScroll.setLayoutParams(detailParams);
+    foodGroups = InventoryGroups.from(model.batches);
     buildFridge();
     buildDetail();
+    if (detailDialog != null && !model.loading && model.selectedId == null) detailDialog.dismiss();
     if (sheetDetail != null) fillDetail(sheetDetail);
     if (!wide && model.selected() != null && !Objects.equals(presentedId, model.selectedId))
       showDetail();
@@ -256,8 +260,7 @@ public final class InventoryFragment extends Fragment {
     controls.addView(freeze, new LinearLayout.LayoutParams(0, -2, 1));
     binding.acFridge.addView(controls, new LinearLayout.LayoutParams(-1, dp(40)));
     List<InventoryBatch> elsewhere = new ArrayList<>();
-    for (var batch : model.batches)
-      if (InventoryPresentation.shelf(batch.getLocation()) < 0) elsewhere.add(batch);
+    for (var group : foodGroups) if (group.shelf() < 0) elsewhere.addAll(group.batches);
     if (!elsewhere.isEmpty()) {
       TextView other = text("其他位置 · " + elsewhere.size() + "批  ›", 12);
       other.setOnClickListener(v -> showBatches("其他储存位置", elsewhere));
@@ -312,9 +315,13 @@ public final class InventoryFragment extends Fragment {
       label.setTextColor(color(R.color.ac_fridge_muted));
       label.setPadding(0, dp(2), 0, 0);
       List<InventoryBatch> items = new ArrayList<>();
-      for (var b : model.batches)
-        if (InventoryPresentation.shelf(b.getLocation()) == index) items.add(b);
-      label.setText(names[index] + (items.size() > 3 ? "  · " + items.size() + "批 ›" : ""));
+      List<InventoryGroups.Group> groups = new ArrayList<>();
+      for (var group : foodGroups)
+        if (group.shelf() == index) {
+          groups.add(group);
+          items.addAll(group.batches);
+        }
+      label.setText(names[index] + (groups.size() > 3 ? "  · " + groups.size() + "种 ›" : ""));
       label.setOnClickListener(v -> showBatches(names[index], items));
       label.setContentDescription(names[index] + "，查看全部批次");
       area.addView(label);
@@ -324,12 +331,12 @@ public final class InventoryFragment extends Fragment {
         area.addView(empty, new LinearLayout.LayoutParams(-1, 0, 1));
       }
       if (freezer) {
-        for (var batch : items.subList(0, Math.min(3, items.size())))
-          area.addView(frozenTile(batch), new LinearLayout.LayoutParams(-1, 0, 1));
+        for (var group : groups.subList(0, Math.min(3, groups.size())))
+          area.addView(frozenTile(group), new LinearLayout.LayoutParams(-1, 0, 1));
       } else if (!items.isEmpty()) {
         LinearLayout row = new LinearLayout(requireContext());
         for (int n = 0; n < 3; n++) {
-          View tile = n < items.size() ? foodTile(items.get(n)) : new View(requireContext());
+          View tile = n < groups.size() ? foodTile(groups.get(n)) : new View(requireContext());
           row.addView(tile, new LinearLayout.LayoutParams(0, -1, 1));
         }
         area.addView(row, new LinearLayout.LayoutParams(-1, 0, 1));
@@ -427,25 +434,33 @@ public final class InventoryFragment extends Fragment {
     if (freezeControl != null) freezeControl.setText("冷冻门 · " + (model.freezeOpen ? "已打开" : "关闭"));
   }
 
-  private View foodTile(InventoryBatch batch) {
+  private View foodTile(InventoryGroups.Group group) {
+    InventoryBatch batch = group.first();
     Ingredient ingredient = model.ingredient(batch);
     String name = InventoryPresentation.name(batch, ingredient),
         unit = InventoryPresentation.unit(batch.getUnit(), name);
     LinearLayout tile = column();
     tile.setGravity(Gravity.CENTER);
     tile.setPadding(dp(2), 0, dp(2), 0);
-    tile.setBackground(foodBackground(batch, 12));
+    tile.setBackground(foodBackground(group, 12));
     TextView emoji = text(InventoryPresentation.emoji(name), compact() ? 22 : 30);
     if (!tiny()) tile.addView(emoji);
     TextView label = text(name, 12);
     label.setMaxLines(1);
     label.setEllipsize(android.text.TextUtils.TruncateAt.END);
     tile.addView(label);
-    TextView qty = text(batch.getQuantity() + " " + unit, 13);
+    TextView qty = text(groupQuantity(group, unit), 13);
     qty.setTypeface(null, Typeface.BOLD);
     tile.addView(qty);
     String status =
         model.today() == null ? "家庭日期读取中" : InventoryPresentation.expiry(batch, model.today());
+    if (group.batches.size() > 1)
+      status =
+          group.batches.size()
+              + "批 · "
+              + (model.today() != null && InventoryPresentation.expired(batch, model.today())
+                  ? "含已过期"
+                  : status);
     TextView expiry = text(status, 11);
     expiry.setTextColor(color(expiryColor(batch)));
     expiry.setGravity(Gravity.CENTER);
@@ -456,19 +471,21 @@ public final class InventoryFragment extends Fragment {
       child.setGravity(Gravity.CENTER);
       child.setPadding(0, 0, 0, 0);
     }
-    tile.setContentDescription(name + "，剩余" + batch.getQuantity() + unit + "，" + status);
+    tile.setContentDescription(
+        name + "，剩余" + groupQuantity(group, unit).replace(" ", "") + "，" + status);
     tile.setClickable(true);
     tile.setFocusable(true);
-    tile.setOnClickListener(v -> selectBatch(batch));
+    tile.setOnClickListener(v -> showIngredient(group));
     return tile;
   }
 
-  private View frozenTile(InventoryBatch batch) {
+  private View frozenTile(InventoryGroups.Group group) {
+    InventoryBatch batch = group.first();
     String name = InventoryPresentation.name(batch, model.ingredient(batch));
     LinearLayout row = new LinearLayout(requireContext());
     row.setGravity(Gravity.CENTER_VERTICAL);
     row.setPadding(dp(3), 0, dp(3), 0);
-    row.setBackground(foodBackground(batch, 10));
+    row.setBackground(foodBackground(group, 10));
     TextView emoji = text(InventoryPresentation.emoji(name), compact() ? 20 : 26);
     row.addView(emoji, new LinearLayout.LayoutParams(dp(compact() ? 28 : 38), -2));
     LinearLayout labels = column();
@@ -477,16 +494,26 @@ public final class InventoryFragment extends Fragment {
     title.setEllipsize(android.text.TextUtils.TruncateAt.END);
     labels.addView(title);
     TextView qty =
-        text(batch.getQuantity() + " " + InventoryPresentation.unit(batch.getUnit(), name), 13);
+        text(groupQuantity(group, InventoryPresentation.unit(batch.getUnit(), name)), 13);
+    if (model.today() != null && InventoryPresentation.expired(batch, model.today())) {
+      qty.append(" · 含过期");
+      qty.setTextColor(color(R.color.ac_fridge_expired));
+    }
     labels.addView(qty);
     title.setPadding(0, 0, 0, 0);
     qty.setPadding(0, 0, 0, 0);
     row.addView(labels, new LinearLayout.LayoutParams(0, -2, 1));
     row.setContentDescription(
-        name + "，剩余" + batch.getQuantity() + InventoryPresentation.unit(batch.getUnit(), name));
+        name
+            + "，剩余"
+            + groupQuantity(group, InventoryPresentation.unit(batch.getUnit(), name))
+                .replace(" ", "")
+            + "，"
+            + group.batches.size()
+            + "批");
     row.setClickable(true);
     row.setFocusable(true);
-    row.setOnClickListener(v -> selectBatch(batch));
+    row.setOnClickListener(v -> showIngredient(group));
     return row;
   }
 
@@ -532,9 +559,27 @@ public final class InventoryFragment extends Fragment {
         unit = InventoryPresentation.unit(batch.getUnit(), name);
     detail.addView(text(InventoryPresentation.emoji(name), compact() ? 36 : 62));
     detail.addView(text(name, 22));
+    for (var group : foodGroups)
+      if (group.contains(batch.getId().toString()) && group.batches.size() > 1) {
+        detail.addView(
+            text(
+                ("ALL".equals(model.filter) ? "总库存 " : "筛选合计 ")
+                    + groupQuantity(group, unit)
+                    + " · "
+                    + group.batches.size()
+                    + "批",
+                15));
+        String usable = group.usableQuantity(model.today());
+        detail.addView(text("未过期可用 " + (usable == null ? "未知" : usable + " " + unit), 12));
+        MaterialButton batches = button("查看全部批次（" + group.batches.size() + "）", true);
+        batches.setOnClickListener(v -> showIngredient(group));
+        detail.addView(batches);
+        break;
+      }
+    detail.addView(text("当前批次", 12));
     detail.addView(text("剩余 " + batch.getQuantity() + " " + unit, 29));
     property(detail, "储存位置", batch.getLocation());
-    property(detail, "录入日期", displayDate(batch.getCreatedAt()));
+    property(detail, "入库时间", displayTime(batch.getCreatedAt()));
     property(detail, "到期日期", batch.getExpiresOn() == null ? "未知" : batch.getExpiresOn());
     property(detail, "库存批次", batch.getId().toString().substring(0, 8));
     TextView expiry =
@@ -662,8 +707,12 @@ public final class InventoryFragment extends Fragment {
               + batch.getQuantity()
               + " "
               + InventoryPresentation.unit(batch.getUnit(), name)
+              + "\n入库 "
+              + displayTime(batch.getCreatedAt())
               + "\n到期 "
               + (batch.getExpiresOn() == null ? "未知" : batch.getExpiresOn())
+              + "\n"
+              + batch.getLocation()
               + " · 批次 "
               + batch.getId().toString().substring(0, 8);
     }
@@ -672,6 +721,28 @@ public final class InventoryFragment extends Fragment {
         .setItems(choices, (d, which) -> selectBatch(batches.get(which)))
         .setNegativeButton("关闭", null)
         .show();
+  }
+
+  private String groupQuantity(InventoryGroups.Group group, String unit) {
+    return group.quantity() == null ? "数量未知" : group.quantity() + " " + unit;
+  }
+
+  private void showIngredient(InventoryGroups.Group group) {
+    if (group.batches.size() == 1) {
+      selectBatch(group.first());
+      return;
+    }
+    String name = InventoryPresentation.name(group.first(), model.ingredient(group.first()));
+    String unit = InventoryPresentation.unit(group.first().getUnit(), name);
+    showBatches(
+        name
+            + " · "
+            + ("ALL".equals(model.filter) ? "共 " : "筛选合计 ")
+            + groupQuantity(group, unit)
+            + " · "
+            + group.batches.size()
+            + "批",
+        group.batches);
   }
 
   private void requestAddFood() {
@@ -711,9 +782,9 @@ public final class InventoryFragment extends Fragment {
     detail.addView(row);
   }
 
-  private GradientDrawable foodBackground(InventoryBatch batch, int radius) {
+  private GradientDrawable foodBackground(InventoryGroups.Group group, int radius) {
     GradientDrawable shape = round(R.color.ac_fridge_selected, radius);
-    if (batch.getId().toString().equals(model.selectedId)) {
+    if (group.contains(model.selectedId)) {
       shape.setStroke(dp(1), color(R.color.ac_fridge_accent));
     } else {
       shape.setColor(android.graphics.Color.TRANSPARENT);
@@ -728,6 +799,17 @@ public final class InventoryFragment extends Fragment {
           .atZoneSameInstant(java.time.ZoneId.of(model.zoneId))
           .toLocalDate()
           .toString();
+    } catch (java.time.DateTimeException | NullPointerException invalid) {
+      return timestamp;
+    }
+  }
+
+  private String displayTime(String timestamp) {
+    if (timestamp == null) return "未知";
+    try {
+      return java.time.OffsetDateTime.parse(timestamp)
+          .atZoneSameInstant(java.time.ZoneId.of(model.zoneId))
+          .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     } catch (java.time.DateTimeException | NullPointerException invalid) {
       return timestamp;
     }
@@ -769,29 +851,50 @@ public final class InventoryFragment extends Fragment {
     form.addView(matches);
     final Ingredient[] selected = {choices.exact(model.draftName)};
     final boolean[] choosing = {false};
-    TextView unit = plainText("", 13);
-    form.addView(unit);
-    Spinner newUnit = new Spinner(requireContext());
-    newUnit.setId(R.id.ac_unit_input);
-    newUnit.setMinimumHeight(dp(48));
-    newUnit.setAdapter(
-        new ArrayAdapter<>(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            new String[] {"选择新食材单位", "克 (g)", "个 / 瓶 (count)", "毫升 (ml)"}));
-    newUnit.setSelection(model.draftUnitIndex);
-    newUnit.setOnItemSelectedListener(
-        new AdapterView.OnItemSelectedListener() {
-          @Override
-          public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
-            model.draftUnitIndex = pos;
-          }
-
-          @Override
-          public void onNothingSelected(AdapterView<?> p) {}
+    LinearLayout quantityRow = new LinearLayout(requireContext());
+    quantityRow.setGravity(Gravity.CENTER_VERTICAL);
+    quantityRow.setOrientation(LinearLayout.HORIZONTAL);
+    TextInputEditText quantity = input(quantityRow, "剩余数量", model.draftQuantity, true);
+    quantityRow.getChildAt(0).setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1));
+    ChipGroup units = new ChipGroup(requireContext());
+    units.setId(R.id.ac_unit_input);
+    units.setSingleLine(true);
+    units.setSingleSelection(true);
+    units.setSelectionRequired(true);
+    units.setChipSpacingHorizontal(0);
+    int[] unitChoices = {1, 4, 2, 3};
+    int[] unitIds = {R.id.ac_unit_g, R.id.ac_unit_kg, R.id.ac_unit_count, R.id.ac_unit_ml};
+    String[] unitLabels = {"g", "kg", "pcs", "ml"};
+    for (int i = 0; i < unitChoices.length; i++) {
+      Chip chip = new Chip(requireContext());
+      chip.setId(unitIds[i]);
+      chip.setTag(unitChoices[i]);
+      chip.setText(unitLabels[i]);
+      chip.setTextSize(12);
+      chip.setCheckable(true);
+      chip.setCheckedIconVisible(false);
+      chip.setChipMinHeight(dp(40));
+      chip.setEnsureMinTouchTargetSize(true);
+      chip.setChipStartPadding(dp(5));
+      chip.setChipEndPadding(dp(5));
+      chip.setTextStartPadding(dp(2));
+      chip.setTextEndPadding(dp(2));
+      units.addView(chip);
+    }
+    units.setOnCheckedStateChangeListener(
+        (group, ids) -> {
+          model.draftUnitIndex = ids.isEmpty() ? 0 : (int) group.findViewById(ids.get(0)).getTag();
+          Unit base = InventoryPresentation.inputBaseUnit(model.draftUnitIndex);
+          units.setContentDescription(
+              base == null
+                  ? "尚未选择单位"
+                  : "单位："
+                      + (model.draftUnitIndex == 4
+                          ? "千克"
+                          : InventoryPresentation.unit(base, picker.getText().toString())));
         });
-    form.addView(newUnit);
-    TextInputEditText quantity = input(form, "剩余数量", model.draftQuantity, true);
+    quantityRow.addView(units, new LinearLayout.LayoutParams(-2, -2));
+    form.addView(quantityRow, new LinearLayout.LayoutParams(-1, -2));
     TextInputEditText expiry = input(form, "到期日期 YYYY-MM-DD（可留空）", model.draftExpiry, false);
     quantity.setId(R.id.ac_quantity_input);
     expiry.setId(R.id.ac_expiry_input);
@@ -808,11 +911,33 @@ public final class InventoryFragment extends Fragment {
         });
     Runnable updateUnit =
         () -> {
-          unit.setVisibility(selected[0] == null ? View.GONE : View.VISIBLE);
-          newUnit.setVisibility(selected[0] == null ? View.VISIBLE : View.GONE);
-          if (selected[0] != null)
-            unit.setText(
-                "单位：" + InventoryPresentation.unit(selected[0].getUnit(), selected[0].getName()));
+          Unit standard = selected[0] == null ? null : selected[0].getUnit();
+          if (standard != null
+              && InventoryPresentation.inputBaseUnit(model.draftUnitIndex) != standard)
+            model.draftUnitIndex = standard == Unit.G ? 1 : standard == Unit.COUNT ? 2 : 3;
+          String typed = picker.getText().toString().toLowerCase(Locale.ROOT);
+          boolean liquid =
+              standard == Unit.ML || typed.matches(".*\\b(water|juice|oil|vinegar|sauce)\\b.*");
+          int selectedChoice = model.draftUnitIndex;
+          for (int i = 0; i < unitChoices.length; i++) {
+            Chip chip = units.findViewById(unitIds[i]);
+            Unit base = InventoryPresentation.inputBaseUnit(unitChoices[i]);
+            chip.setEnabled(standard == null || standard == base);
+            chip.setVisibility(unitChoices[i] == 3 && !liquid ? View.GONE : View.VISIBLE);
+          }
+          if (selectedChoice == 0) units.clearCheck();
+          else
+            for (int i = 0; i < unitChoices.length; i++)
+              if (unitChoices[i] == selectedChoice) units.check(unitIds[i]);
+          units.setContentDescription(
+              standard == null && selectedChoice == 0
+                  ? "尚未选择单位"
+                  : "单位："
+                      + (selectedChoice == 4
+                          ? "千克"
+                          : InventoryPresentation.unit(
+                              InventoryPresentation.inputBaseUnit(selectedChoice),
+                              picker.getText().toString())));
         };
     java.util.function.Consumer<Ingredient> choose =
         item -> {
@@ -835,7 +960,7 @@ public final class InventoryFragment extends Fragment {
           if (choices.exact(query) != null) return;
           List<Ingredient> results = choices.search(query);
           if (results.isEmpty()) {
-            matches.addView(plainText("新食材：选择单位后即可直接保存。", 12));
+            matches.addView(plainText("新食材：在数量右侧选择单位后保存。", 12));
             return;
           }
           for (Ingredient item : results.subList(0, Math.min(3, results.size()))) {
@@ -852,10 +977,11 @@ public final class InventoryFragment extends Fragment {
           model.draftName = value;
           if (choosing[0]) return;
           Ingredient exact = choices.exact(value);
-          if (exact != null && (selected[0] == null || !exact.getId().equals(selected[0].getId())))
-            location.setSelection(InventoryPresentation.suggestedShelf(exact.getName()));
+          if (different && !value.trim().isEmpty())
+            location.setSelection(
+                InventoryPresentation.suggestedShelf(exact == null ? value : exact.getName()));
           selected[0] = exact;
-          if (different && exact == null) newUnit.setSelection(0);
+          if (different && exact == null) model.draftUnitIndex = 0;
           updateUnit.run();
           showMatches.run();
         });
@@ -875,26 +1001,31 @@ public final class InventoryFragment extends Fragment {
                   .equals(IngredientChoices.normalize(ingredient.getName())))
             ingredient = choices.exact(typed);
           if (ingredient == null) {
-            Unit[] units = {null, Unit.G, Unit.COUNT, Unit.ML};
-            Unit chosenUnit = units[newUnit.getSelectedItemPosition()];
+            Unit chosenUnit = InventoryPresentation.inputBaseUnit(model.draftUnitIndex);
+            String amount =
+                InventoryPresentation.inputQuantity(
+                    quantity.getText().toString(), model.draftUnitIndex);
             Ingredient existing = chosenUnit == null ? null : choices.exact(typed, chosenUnit);
             if (existing != null)
               model.create(
                   existing,
-                  quantity.getText().toString(),
+                  amount,
                   InventoryPresentation.LOCATIONS[location.getSelectedItemPosition()],
                   expiry.getText().toString());
             else
               model.createNamed(
                   typed,
                   chosenUnit,
-                  quantity.getText().toString(),
+                  amount,
                   InventoryPresentation.LOCATIONS[location.getSelectedItemPosition()],
                   expiry.getText().toString());
           } else {
+            if (ingredient.getUnit() != InventoryPresentation.inputBaseUnit(model.draftUnitIndex))
+              throw new IllegalArgumentException("所选单位与标准食材不一致，个数与重量不能直接换算");
             model.create(
                 ingredient,
-                quantity.getText().toString(),
+                InventoryPresentation.inputQuantity(
+                    quantity.getText().toString(), model.draftUnitIndex),
                 InventoryPresentation.LOCATIONS[location.getSelectedItemPosition()],
                 expiry.getText().toString());
           }
@@ -938,7 +1069,55 @@ public final class InventoryFragment extends Fragment {
       all.setOnClickListener(v -> amount.setText(batch.getQuantity()));
       form.addView(all);
     }
-    showForm(title, form, () -> model.change(batch, amount.getText().toString(), reason));
+    final androidx.appcompat.app.AlertDialog[] entry = {null};
+    entry[0] =
+        showValidatedForm(
+            title,
+            form,
+            () -> {
+              String value = amount.getText().toString();
+              String after =
+                  correction
+                      ? InventoryPresentation.number(InventoryPresentation.quantity(value))
+                      : InventoryPresentation.after(batch.getQuantity(), value);
+              if (reason != ChangeReason.CONSUME || !"0".equals(after)) {
+                model.change(batch, value, reason);
+                return true;
+              }
+              String name = InventoryPresentation.name(batch, model.ingredient(batch));
+              boolean last =
+                  "ALL".equals(model.filter)
+                      && !InventoryPresentation.otherBatchesRemain(batch, model.batches);
+              String message =
+                  last
+                      ? "本次使用后，「" + name + "」的所有存储将全部用完。确认后将从冰箱中移除。"
+                      : "本次使用后，「" + name + "」这批存储将全部用完。确认后本批次将从冰箱中移除；其他批次如有剩余，会继续保留。";
+              var confirm =
+                  new MaterialAlertDialogBuilder(requireContext())
+                      .setTitle("确认食材已用完")
+                      .setMessage(message)
+                      .setNegativeButton(
+                          "返回修改用量",
+                          (d, which) -> {
+                            amount.requestFocus();
+                            amount.selectAll();
+                          })
+                      .setPositiveButton(
+                          "确认用完",
+                          (d, which) -> {
+                            try {
+                              model.change(batch, value, reason);
+                              entry[0].dismiss();
+                            } catch (IllegalArgumentException error) {
+                              amount.setError(error.getMessage());
+                            }
+                          })
+                      .create();
+              dialogs.add(confirm);
+              confirm.setOnDismissListener(d -> dialogs.remove(confirm));
+              confirm.show();
+              return false;
+            });
   }
 
   private void editDialog(InventoryBatch batch) {
@@ -976,6 +1155,17 @@ public final class InventoryFragment extends Fragment {
   }
 
   private void showForm(String title, LinearLayout form, Runnable submit) {
+    showValidatedForm(
+        title,
+        form,
+        () -> {
+          submit.run();
+          return true;
+        });
+  }
+
+  private androidx.appcompat.app.AlertDialog showValidatedForm(
+      String title, LinearLayout form, java.util.function.BooleanSupplier submit) {
     TextView validation = plainText("", 13);
     validation.setId(R.id.ac_form_error);
     validation.setTextColor(color(R.color.ac_fridge_expired));
@@ -999,8 +1189,7 @@ public final class InventoryFragment extends Fragment {
                 .setOnClickListener(
                     v -> {
                       try {
-                        submit.run();
-                        dialog.dismiss();
+                        if (submit.getAsBoolean()) dialog.dismiss();
                       } catch (IllegalArgumentException error) {
                         validation.setText(error.getMessage());
                         validation.setVisibility(View.VISIBLE);
@@ -1008,6 +1197,7 @@ public final class InventoryFragment extends Fragment {
                     }));
     dialog.setOnDismissListener(ignored -> dialogs.remove(dialog));
     dialog.show();
+    return dialog;
   }
 
   private Spinner location(LinearLayout form, int selected) {
