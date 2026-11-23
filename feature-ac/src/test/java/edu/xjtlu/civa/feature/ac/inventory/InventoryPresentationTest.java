@@ -24,6 +24,31 @@ public class InventoryPresentationTest {
     assertEquals("瓶", InventoryPresentation.unit(Unit.COUNT, "牛奶"));
     assertEquals("个", InventoryPresentation.unit(Unit.COUNT, "虾"));
     assertEquals("克", InventoryPresentation.unit(Unit.G, "牛肉"));
+    assertEquals("克", InventoryPresentation.unit(Unit.G, "beef"));
+    assertEquals("个", InventoryPresentation.unit(Unit.COUNT, "egg"));
+    assertEquals("瓶", InventoryPresentation.unit(Unit.COUNT, "almond milk"));
+  }
+
+  @Test
+  public void addRequiresPositivePlainDecimalButCorrectionMayReachZero() {
+    assertEquals("0.125", InventoryPresentation.positiveQuantity("0.125"));
+    assertEquals("0", InventoryPresentation.number(InventoryPresentation.quantity("0")));
+    for (String value : new String[] {"0", "-1", "1e2", ".5", "0.0001"})
+      assertThrows(
+          IllegalArgumentException.class, () -> InventoryPresentation.positiveQuantity(value));
+  }
+
+  @Test
+  public void defaultShelvesFollowDemoWithoutChangingCanonicalUnits() {
+    assertEquals(0, InventoryPresentation.suggestedShelf("牛奶"));
+    assertEquals(0, InventoryPresentation.suggestedShelf("鸡蛋"));
+    assertEquals(1, InventoryPresentation.suggestedShelf("西红柿"));
+    assertEquals(2, InventoryPresentation.suggestedShelf("苹果"));
+    assertEquals(3, InventoryPresentation.suggestedShelf("牛肉"));
+    assertEquals(4, InventoryPresentation.suggestedShelf("虾"));
+    assertEquals(3, InventoryPresentation.suggestedShelf("Smoked Beef"));
+    assertEquals(0, InventoryPresentation.suggestedShelf("egg"));
+    assertEquals(4, InventoryPresentation.suggestedShelf("shrimp"));
   }
 
   @Test

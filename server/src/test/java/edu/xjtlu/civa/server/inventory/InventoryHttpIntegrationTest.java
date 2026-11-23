@@ -42,6 +42,7 @@ class InventoryHttpIntegrationTest {
   UUID owner, outsider, home, otherHome, ingredient, inactive, recipe;
   String token, otherToken, alias;
   LocalDate today;
+  final java.util.Set<UUID> createdIngredients = new java.util.LinkedHashSet<>();
 
   @BeforeEach
   void fixtures() throws Exception {
@@ -109,7 +110,8 @@ class InventoryHttpIntegrationTest {
       jdbc.update("DELETE FROM memberships WHERE household_id=?", id);
       jdbc.update("DELETE FROM households WHERE id=?", id);
     }
-    for (UUID id : List.of(ingredient, inactive)) {
+    createdIngredients.addAll(List.of(ingredient, inactive));
+    for (UUID id : createdIngredients) {
       jdbc.update("DELETE FROM ingredient_aliases WHERE ingredient_id=?", id);
       jdbc.update("DELETE FROM ingredients WHERE id=?", id);
     }
@@ -140,6 +142,189 @@ class InventoryHttpIntegrationTest {
         .andExpect(jsonPath("$.total").value(1));
     http.perform(auth(get("/api/v1/ingredients").param("size", "101")))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void typedNewEnglishIngredientCanBeCreatedReusedAndSavedAsInventory() throws Exception {
+    String name = "quinoa_" + UUID.randomUUID();
+    String body = json.writeValueAsString(Map.of("name", name, "unit", "G"));
+    UUID key = UUID.randomUUID();
+    JsonNode made = ingredientRequest(token, key, body, 201);
+    UUID id = UUID.fromString(made.path("id").asText());
+    createdIngredients.add(id);
+    assertEquals("G", made.path("unit").asText());
+    assertEquals(id.toString(), ingredientRequest(token, key, body, 201).path("id").asText());
+    assertEquals(
+        id.toString(),
+        ingredientRequest(
+                token,
+                UUID.randomUUID(),
+                json.writeValueAsString(
+                    Map.of(
+                        "name",
+                        "  " + name.toUpperCase(java.util.Locale.ROOT) + "  ",
+                        "unit",
+                        "G")),
+                200)
+            .path("id")
+            .asText());
+    ingredientRequest(
+        token, key, json.writeValueAsString(Map.of("name", name, "unit", "COUNT")), 409);
+    http.perform(
+            auth(post("/api/v1/ingredients"))
+                .header("Idempotency-Key", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("name", name, "unit", "COUNT"))))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.code").value("UNIT_CONFLICT"));
+    http.perform(
+            auth(post(path()))
+                .header("Idempotency-Key", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    json.writeValueAsString(
+                        Map.of(
+                            "ingredientId",
+                            id,
+                            "quantity",
+                            "250",
+                            "unit",
+                            "G",
+                            "location",
+                            "冷藏 · 蔬菜层"))))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.ingredientId").value(id.toString()))
+        .andExpect(jsonPath("$.quantity").value("250"));
+    assertEquals(
+        1,
+        jdbc.queryForObject("SELECT count(*) FROM ingredients WHERE name=?", Integer.class, name));
+    assertEquals(
+        "250.000",
+        jdbc.queryForObject(
+            "SELECT quantity::text FROM inventory_batches WHERE ingredient_id=?",
+            String.class,
+            id));
+    http.perform(auth(get("/api/v1/ingredients").param("q", name)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].id").value(id.toString()));
+  }
+
+  @Test
+  void creatingByExistingAliasNeverChangesItsUnitAndRechecksMembership() throws Exception {
+    JsonNode reused =
+        ingredientRequest(
+            token,
+            UUID.randomUUID(),
+            json.writeValueAsString(Map.of("name", alias, "unit", "G")),
+            200);
+    assertEquals(ingredient.toString(), reused.path("id").asText());
+    ingredientRequest(
+        token,
+        UUID.randomUUID(),
+        json.writeValueAsString(Map.of("name", alias, "unit", "COUNT")),
+        409);
+    ingredientRequest(
+        token,
+        UUID.randomUUID(),
+        json.writeValueAsString(Map.of("name", "inactive_" + inactive, "unit", "G")),
+        409);
+    http.perform(
+            post("/api/v1/ingredients")
+                .header("Idempotency-Key", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"food\",\"unit\":\"G\"}"))
+        .andExpect(status().isUnauthorized());
+    ingredientRequest(token, UUID.randomUUID(), "{\"name\":\"   \",\"unit\":\"G\"}", 400);
+    UUID key = UUID.randomUUID();
+    String body = json.writeValueAsString(Map.of("name", alias, "unit", "G"));
+    ingredientRequest(token, key, body, 200);
+    jdbc.update("UPDATE memberships SET active=false WHERE user_id=?", owner);
+    http.perform(
+            auth(post("/api/v1/ingredients"))
+                .header("Idempotency-Key", key)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("HOUSEHOLD_REQUIRED"));
+    assertEquals(
+        "G",
+        jdbc.queryForObject("SELECT unit FROM ingredients WHERE id=?", String.class, ingredient));
+  }
+
+  @Test
+  void concurrentIngredientCreationAcrossHouseholdsProducesOneStandardId() throws Exception {
+    String name = "grain_" + UUID.randomUUID();
+    String body = json.writeValueAsString(Map.of("name", name, "unit", "G"));
+    var pool = Executors.newFixedThreadPool(2);
+    var start = new CountDownLatch(1);
+    try {
+      java.util.List<java.util.concurrent.Future<JsonNode>> results = new java.util.ArrayList<>();
+      for (String credential : List.of(token, otherToken))
+        results.add(
+            pool.submit(
+                () -> {
+                  start.await();
+                  var response =
+                      http.perform(
+                              post("/api/v1/ingredients")
+                                  .header("Authorization", "Bearer " + credential)
+                                  .header("Idempotency-Key", UUID.randomUUID())
+                                  .contentType(MediaType.APPLICATION_JSON)
+                                  .content(body))
+                          .andReturn()
+                          .getResponse();
+                  assertTrue(response.getStatus() == 200 || response.getStatus() == 201);
+                  return json.readTree(response.getContentAsString());
+                }));
+      start.countDown();
+      JsonNode first = results.get(0).get(10, TimeUnit.SECONDS),
+          second = results.get(1).get(10, TimeUnit.SECONDS);
+      createdIngredients.add(UUID.fromString(first.path("id").asText()));
+      createdIngredients.add(UUID.fromString(second.path("id").asText()));
+      assertEquals(first.path("id"), second.path("id"));
+      assertEquals(
+          1,
+          jdbc.queryForObject(
+              "SELECT count(*) FROM ingredients WHERE name=?", Integer.class, name));
+    } finally {
+      pool.shutdownNow();
+    }
+  }
+
+  @Test
+  void canonicalNameSearchWorksWithoutADuplicateAliasRow() throws Exception {
+    String name = "番茄_" + ingredient;
+    jdbc.update(
+        "DELETE FROM ingredient_aliases WHERE ingredient_id=? AND normalized_name=?",
+        ingredient,
+        IngredientNames.normalize(name));
+    http.perform(auth(get("/api/v1/ingredients").param("q", name)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].id").value(ingredient.toString()));
+    assertEquals(
+        ingredient.toString(),
+        ingredientRequest(
+                token,
+                UUID.randomUUID(),
+                json.writeValueAsString(Map.of("name", name, "unit", "G")),
+                200)
+            .path("id")
+            .asText());
+  }
+
+  private JsonNode ingredientRequest(String credential, UUID key, String body, int expected)
+      throws Exception {
+    var response =
+        http.perform(
+                post("/api/v1/ingredients")
+                    .header("Authorization", "Bearer " + credential)
+                    .header("Idempotency-Key", key)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body))
+            .andExpect(status().is(expected))
+            .andReturn()
+            .getResponse();
+    return json.readTree(response.getContentAsString());
   }
 
   @Test

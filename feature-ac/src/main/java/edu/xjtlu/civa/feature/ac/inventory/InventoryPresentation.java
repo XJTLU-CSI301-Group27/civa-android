@@ -20,6 +20,8 @@ final class InventoryPresentation {
 
   static BigDecimal quantity(String raw) {
     if (raw == null || raw.trim().isEmpty()) throw new IllegalArgumentException("请输入数量");
+    if (!raw.trim().matches("[0-9]+(\\.[0-9]{1,3})?"))
+      throw new IllegalArgumentException("数量必须是非负数字，最多三位小数");
     BigDecimal value;
     try {
       value = new BigDecimal(raw.trim());
@@ -27,6 +29,30 @@ final class InventoryPresentation {
       throw new IllegalArgumentException("数量格式不正确");
     }
     return QuantityInputs.toBase(value, "G").amount;
+  }
+
+  static String positiveQuantity(String raw) {
+    BigDecimal value = quantity(raw);
+    if (value.signum() <= 0) throw new IllegalArgumentException("新增数量必须大于0");
+    return number(value);
+  }
+
+  static int suggestedShelf(String name) {
+    String english = name.toLowerCase(Locale.ROOT);
+    if (name.contains("奶")
+        || name.contains("蛋")
+        || english.matches(".*\\b(milk|egg|eggs|yogurt|yoghurt)\\b.*")) return 0;
+    if (name.contains("虾")
+        || name.contains("贝")
+        || name.contains("鱼")
+        || english.matches(".*\\b(shrimp|prawn|fish|scallop|scallops)\\b.*")) return 4;
+    if (name.contains("肉") || english.matches(".*\\b(beef|pork|lamb|mutton|chicken|meat)\\b.*"))
+      return 3;
+    if (name.contains("苹果")
+        || name.contains("橙")
+        || name.contains("橘")
+        || english.matches(".*\\b(apple|apples|orange|oranges|fruit)\\b.*")) return 2;
+    return 1;
   }
 
   static String after(String before, String consumed) {
@@ -64,11 +90,23 @@ final class InventoryPresentation {
   static String unit(Unit unit, String name) {
     if (unit == Unit.G) return "克";
     if (unit == Unit.ML) return "毫升";
-    if (unit == Unit.COUNT) return name.contains("奶") ? "瓶" : "个";
+    if (unit == Unit.COUNT)
+      return name.contains("奶")
+              || name.toLowerCase(Locale.ROOT).matches(".*\\b(milk|yogurt|yoghurt)\\b.*")
+          ? "瓶"
+          : "个";
     return "单位未知";
   }
 
   static String emoji(String name) {
+    String english = name.toLowerCase(Locale.ROOT);
+    if (english.matches(".*\\b(beef|pork|lamb|mutton|chicken|meat)\\b.*")) return "🥩";
+    if (english.matches(".*\\b(egg|eggs)\\b.*")) return "🥚";
+    if (english.matches(".*\\b(milk|yogurt|yoghurt)\\b.*")) return "🥛";
+    if (english.matches(".*\\b(shrimp|prawn)\\b.*")) return "🦐";
+    if (english.matches(".*\\b(fish|scallop|scallops)\\b.*")) return "🐟";
+    if (english.matches(".*\\b(apple|apples)\\b.*")) return "🍎";
+    if (english.matches(".*\\b(orange|oranges)\\b.*")) return "🍊";
     if (name.contains("虾")) return "🦐";
     if (name.contains("蛋")) return "🥚";
     if (name.contains("奶")) return "🥛";

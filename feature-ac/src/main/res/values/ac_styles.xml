@@ -1,0 +1,25 @@
+<resources>
+    <!-- Inventory-only variants of the existing Material controls, matching the approved demo. -->
+    <style name="ac_FridgeAction" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/ac_fridge_ink</item>
+        <item name="android:textColor">@color/ac_fridge_background</item>
+        <item name="cornerRadius">28dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">2dp</item>
+        <item name="android:insetBottom">2dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+    <style name="ac_FridgeOutline" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">@color/ac_fridge_panel</item>
+        <item name="android:textColor">@color/ac_fridge_ink</item>
+        <item name="strokeColor">@color/ac_fridge_line</item>
+        <item name="cornerRadius">28dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">2dp</item>
+        <item name="android:insetBottom">2dp</item>
+    </style>
+</resources>

@@ -27,6 +27,18 @@
 
 ## Evidence
 
+### C direct English ingredient entry: taskc_version3
+
+Added four real PostgreSQL HTTP cases for create/reuse, unit and membership
+checks, concurrent creation and canonical-name search. IngredientChoicesTest
+covers typed alias resolution, candidate deduplication and unit ambiguity.
+Current server 47, Android 35 and Python 17 reports have no failures; build and
+contract checks passed, lint 0 errors / 20 warnings. The count assertion for
+the new 42nd OpenAPI operation was updated with an explicit Inventory row check.
+Commands, historical screenshots and unexecuted UI checks are in
+[taskc_version3](c-history/taskc_version3.md).
+
+
 ### C initial native fridge UI: taskc_version2
 
 Adds InventoryPresentationTest (four cases), native fridge fixtures and historical

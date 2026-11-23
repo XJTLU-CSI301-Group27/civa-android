@@ -55,10 +55,11 @@ final class InventoryService {
     return reads.execute(
         tx -> {
           String filter =
-              " FROM ingredients i WHERE i.active AND (?='' OR EXISTS (SELECT 1 FROM"
-                  + " ingredient_aliases a WHERE a.ingredient_id=i.id AND position(? in"
-                  + " a.normalized_name)>0))";
-          long total = jdbc.queryForObject("SELECT count(*)" + filter, Long.class, q, q);
+              " FROM ingredients i WHERE i.active AND (?='' OR position(? in"
+                  + " lower(regexp_replace(trim(normalize(i.name,NFKC)), '\\s+', ' ', 'g')))>0 OR"
+                  + " EXISTS (SELECT 1 FROM ingredient_aliases a WHERE a.ingredient_id=i.id AND"
+                  + " position(? in a.normalized_name)>0))";
+          long total = jdbc.queryForObject("SELECT count(*)" + filter, Long.class, q, q, q);
           List<Ingredient> items =
               jdbc.query(
                   "SELECT i.*" + filter + " ORDER BY i.name,i.id LIMIT ? OFFSET ?",
@@ -79,10 +80,105 @@ final class InventoryService {
                   },
                   q,
                   q,
+                  q,
                   size,
                   (long) page * size);
           return new IngredientPage(items, page, size, total);
         });
+  }
+
+  IdempotencyExecutor.Result createIngredient(
+      UUID actor, UUID key, byte[] digest, CreateIngredientRequest body) {
+    String normalized = IngredientNames.normalize(body.getName());
+    if (body.getUnit() == null
+        || !java.nio.charset.StandardCharsets.UTF_8.newEncoder().canEncode(body.getName()))
+      throw new IllegalArgumentException("Valid name and unit required");
+    String display =
+        java.text.Normalizer.normalize(body.getName().trim(), java.text.Normalizer.Form.NFKC)
+            .replaceAll("\\s+", " ");
+    return idempotency.execute(
+        actor,
+        key,
+        digest,
+        () -> {
+          authorizeIngredientCreation(actor);
+          // Across households, equivalent names serialize without migrating old ingredient IDs.
+          jdbc.query(
+              "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
+              ps -> ps.setString(1, "civa:ingredient:" + normalized),
+              rs -> {});
+          List<UUID> ids =
+              jdbc.query(
+                  "SELECT ingredient_id FROM ingredient_aliases WHERE normalized_name=?",
+                  (rs, n) -> rs.getObject(1, UUID.class),
+                  normalized);
+          if (ids.isEmpty()) {
+            ids =
+                jdbc.query(
+                    "SELECT id FROM ingredients WHERE"
+                        + " lower(regexp_replace(trim(normalize(name,NFKC)), '\\s+', ' ', 'g'))=?"
+                        + " ORDER BY id",
+                    (rs, n) -> rs.getObject(1, UUID.class),
+                    normalized);
+          }
+          if (!ids.isEmpty()) {
+            Ingredient existing = ingredient(ids.get(0));
+            if (!Boolean.TRUE.equals(existing.getActive()))
+              throw new InventoryFailure("INGREDIENT_INACTIVE");
+            if (existing.getUnit() != body.getUnit()) throw new InventoryFailure("UNIT_CONFLICT");
+            return new IdempotencyExecutor.Result(200, jsonb.write(json.valueToTree(existing)));
+          }
+          UUID id = UUID.randomUUID();
+          jdbc.update(
+              "INSERT INTO ingredients(id,name,unit,active) VALUES (?,?,?,true)",
+              id,
+              display,
+              body.getUnit().getValue());
+          jdbc.update(
+              "INSERT INTO ingredient_aliases(normalized_name,ingredient_id,display_name) VALUES"
+                  + " (?,?,?) ON CONFLICT(normalized_name) DO NOTHING",
+              normalized,
+              id,
+              display);
+          UUID bound =
+              jdbc.queryForObject(
+                  "SELECT ingredient_id FROM ingredient_aliases WHERE normalized_name=?",
+                  UUID.class,
+                  normalized);
+          if (!id.equals(bound)) throw new InventoryFailure("NAME_CONFLICT");
+          return stored(ingredient(id));
+        },
+        result -> authorizeIngredientCreation(actor));
+  }
+
+  private void authorizeIngredientCreation(UUID actor) {
+    List<UUID> homes =
+        jdbc.query(
+            "SELECT household_id FROM memberships WHERE user_id=? AND active ORDER BY household_id",
+            (rs, n) -> rs.getObject(1, UUID.class),
+            actor);
+    if (homes.isEmpty()) throw new InventoryFailure("HOUSEHOLD_REQUIRED");
+    authorize(actor, homes.get(0), true);
+  }
+
+  private Ingredient ingredient(UUID id) {
+    Ingredient value =
+        jdbc.queryForObject(
+            "SELECT id,name,unit,active FROM ingredients WHERE id=?",
+            (rs, n) ->
+                new Ingredient()
+                    .id(rs.getObject("id", UUID.class))
+                    .name(rs.getString("name"))
+                    .unit(Unit.fromValue(rs.getString("unit")))
+                    .active(rs.getBoolean("active")),
+            id);
+    value.setAliases(
+        jdbc.query(
+            "SELECT display_name FROM ingredient_aliases WHERE ingredient_id=? ORDER BY"
+                + " normalized_name",
+            (rs, n) -> rs.getString(1),
+            id));
+    return value;
   }
 
   InventoryBatchPage batches(

@@ -2,6 +2,16 @@
 
 Status: Draft
 
+C typed-entry candidate adds POST /api/v1/ingredients (createIngredient), using
+CreateIngredientRequest and the existing Ingredient / Unit. See
+[IC-20261122-C-FREE-ENTRY](../contracts/changes/IC-20261122-C-FREE-ENTRY.md).
+Reuses global canonical ingredients and aliases; inventory remains household
+scoped. Active household membership, idempotency, unit conflicts and concurrent
+name reuse are checked. No database migration or old-ID/unit rewrite.
+Local implementation follows the explicitly confirmed creation scope; team
+proposal status remains PROPOSED.
+
+
 C native UI candidate: InventoryFragment / InventoryHost assembly is described
 in [IC-20261122-C-UI-01](../contracts/changes/IC-20261122-C-UI-01.md) and the
 draft public surface. Reuses existing inventory routes, units, authentication

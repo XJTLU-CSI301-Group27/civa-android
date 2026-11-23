@@ -21,13 +21,15 @@ final class InventoryViewModel extends ViewModel {
   String filter = "ALL", selectedId, message = "", zoneId;
   private String outcome = "";
   String draftName = "", draftQuantity = "", draftExpiry = "";
-  int draftIngredient, draftLocation = 1;
+  int draftIngredient, draftUnitIndex, draftLocation = 1;
   private final ApiProvider api;
   private final ApiCalls calls;
   private final SessionStore sessions;
   private String userId, homeId;
   private int readGeneration;
   PendingWrite pending;
+  InventoryMovement latestMovement;
+  String movementMessage = "";
 
   InventoryViewModel(ApiProvider api, ApiCalls calls, SessionStore sessions) {
     this.api = api;
@@ -47,6 +49,11 @@ final class InventoryViewModel extends ViewModel {
 
   boolean hasHousehold() {
     return sessions.currentHouseholdId() != null;
+  }
+
+  boolean scopeChanged() {
+    return !Objects.equals(userId, sessions.currentUserId())
+        || !Objects.equals(homeId, sessions.currentHouseholdId());
   }
 
   LocalDate today() {
@@ -77,7 +84,10 @@ final class InventoryViewModel extends ViewModel {
 
   void select(InventoryBatch batch) {
     selectedId = batch.getId().toString();
+    latestMovement = null;
+    movementMessage = "";
     changed();
+    loadMovement();
   }
 
   void filter(String value) {
@@ -99,6 +109,8 @@ final class InventoryViewModel extends ViewModel {
     userId = user;
     homeId = home;
     cancelReads();
+    latestMovement = null;
+    movementMessage = "";
     int generation = ++readGeneration;
     if (userId == null || homeId == null) {
       loading = false;
@@ -137,6 +149,42 @@ final class InventoryViewModel extends ViewModel {
         });
   }
 
+  private void loadMovement() {
+    InventoryBatch selected = selected();
+    if (selected == null || !current()) return;
+    String batchId = selected.getId().toString();
+    int generation = readGeneration;
+    Call<InventoryMovementPage> call =
+        api.inventory().listInventoryMovements(UUID.fromString(homeId), selected.getId(), 0, 1);
+    requests.add(call);
+    calls.enqueue(
+        call,
+        new ApiCallback<InventoryMovementPage>() {
+          @Override
+          public void onSuccess(InventoryMovementPage value) {
+            requests.remove(call);
+            if (!current() || generation != readGeneration || !Objects.equals(batchId, selectedId))
+              return;
+            if (value == null || value.getItems() == null) {
+              movementMessage = "变动记录返回异常，请刷新重试";
+            } else {
+              latestMovement = value.getItems().isEmpty() ? null : value.getItems().get(0);
+              movementMessage = "";
+            }
+            changed();
+          }
+
+          @Override
+          public void onError(ApiError error) {
+            requests.remove(call);
+            if (!current() || generation != readGeneration || !Objects.equals(batchId, selectedId))
+              return;
+            movementMessage = "变动记录暂未加载，请刷新重试";
+            changed();
+          }
+        });
+  }
+
   private void loadBatches(int page, int generation, List<InventoryBatch> result) {
     read(
         api.inventory()
@@ -156,6 +204,7 @@ final class InventoryViewModel extends ViewModel {
                         ? "当前筛选下暂无库存，可以添加食材。"
                         : "已读取 " + batches.size() + " 个库存批次");
             changed();
+            loadMovement();
           }
         });
   }
@@ -193,6 +242,8 @@ final class InventoryViewModel extends ViewModel {
     batches.clear();
     ingredients.clear();
     pending = null;
+    latestMovement = null;
+    movementMessage = "";
     loading = false;
     busy = false;
     message = "登录或家庭状态已改变，请重新进入库存。";
@@ -216,10 +267,15 @@ final class InventoryViewModel extends ViewModel {
               public void onSuccess(List<PendingWrite> values) {
                 recovering = false;
                 if (!current()) return;
-                for (var value : values)
+                List<PendingWrite> ordered = new ArrayList<>(values);
+                ordered.sort(
+                    java.util.Comparator.comparingInt(
+                        w -> "createInventoryBatch".equals(w.operationId) ? 0 : 1));
+                for (var value : ordered)
                   if (Objects.equals(homeId, value.householdId)
                       && ("createInventoryBatch".equals(value.operationId)
-                          || "changeInventory".equals(value.operationId))) {
+                          || "changeInventory".equals(value.operationId)
+                          || "createIngredient".equals(value.operationId))) {
                     pending = value;
                     message = "发现待确认操作，请核对后使用原请求重试；不会自动重复扣减。";
                     break;
@@ -237,7 +293,7 @@ final class InventoryViewModel extends ViewModel {
 
   void create(Ingredient ingredient, String quantity, String location, String expiry) {
     if (ingredient == null) throw new IllegalArgumentException("请选择标准食材");
-    String amount = InventoryPresentation.number(InventoryPresentation.quantity(quantity));
+    String amount = InventoryPresentation.positiveQuantity(quantity);
     String date = InventoryPresentation.date(expiry);
     try {
       JSONObject payload =
@@ -248,6 +304,27 @@ final class InventoryViewModel extends ViewModel {
               .put("location", location)
               .put("expiresOn", date == null ? JSONObject.NULL : date);
       submit("createInventoryBatch", payload);
+    } catch (org.json.JSONException error) {
+      throw new IllegalArgumentException("录入内容无效", error);
+    }
+  }
+
+  void createNamed(String name, Unit unit, String quantity, String location, String expiry) {
+    String typed = name == null ? "" : name.trim();
+    if (typed.isEmpty() || typed.codePointCount(0, typed.length()) > 120)
+      throw new IllegalArgumentException("请输入1–120个字符的食材名称");
+    if (unit == null) throw new IllegalArgumentException("请选择新食材的单位");
+    String amount = InventoryPresentation.positiveQuantity(quantity);
+    String date = InventoryPresentation.date(expiry);
+    try {
+      submit(
+          "createIngredient",
+          new JSONObject()
+              .put("name", typed)
+              .put("unit", unit.getValue())
+              .put("quantity", amount)
+              .put("location", location)
+              .put("expiresOn", date == null ? JSONObject.NULL : date));
     } catch (org.json.JSONException error) {
       throw new IllegalArgumentException("录入内容无效", error);
     }
@@ -353,7 +430,15 @@ final class InventoryViewModel extends ViewModel {
     try {
       JSONObject p = new JSONObject(write.canonicalPayload);
       Call<?> call;
-      if ("createInventoryBatch".equals(write.operationId))
+      if ("createIngredient".equals(write.operationId))
+        call =
+            api.inventory()
+                .createIngredient(
+                    UUID.fromString(write.key),
+                    new CreateIngredientRequest()
+                        .name(p.getString("name"))
+                        .unit(Unit.fromValue(p.getString("unit"))));
+      else if ("createInventoryBatch".equals(write.operationId))
         call =
             api.inventory()
                 .createInventoryBatch(
@@ -393,6 +478,19 @@ final class InventoryViewModel extends ViewModel {
           public void onSuccess(T value) {
             requests.remove(call);
             if (!current()) return;
+            if (value instanceof Ingredient item && "createIngredient".equals(write.operationId)) {
+              ingredients.put(item.getId(), item);
+              continueIngredientCreation(item, write);
+              return;
+            }
+            if (value instanceof InventoryBatch batch
+                && "createInventoryBatch".equals(write.operationId)) {
+              selectedId = batch.getId().toString();
+              filter = "ALL";
+              int shelf = InventoryPresentation.shelf(batch.getLocation());
+              if (shelf >= 0 && shelf < 3) coldOpen = true;
+              else if (shelf >= 3) freezeOpen = true;
+            }
             finish(write, "操作已保存");
           }
 
@@ -420,22 +518,151 @@ final class InventoryViewModel extends ViewModel {
   }
 
   private void finish(PendingWrite write, String result) {
+    List<String> keys = new ArrayList<>();
+    try {
+      JSONObject p = new JSONObject(write.canonicalPayload);
+      if (p.has("ingredientRequestKey")) keys.add(p.getString("ingredientRequestKey"));
+      if ("createIngredient".equals(write.operationId) && result.startsWith("已结束"))
+        keys.add(childKey(write.key));
+    } catch (org.json.JSONException invalid) {
+      if (!result.startsWith("已结束")) {
+        busy = false;
+        message = "待确认记录无效，请核对库存后结束记录";
+        changed();
+        return;
+      }
+    }
+    keys.add(write.key);
+    confirmKeys(
+        write.userId,
+        keys,
+        0,
+        () -> {
+          pending = null;
+          busy = false;
+          load();
+          outcome = "操作已保存".equals(result) || result.startsWith("已结束") ? result : errorText(result);
+          message = outcome;
+          changed();
+        });
+  }
+
+  private static String childKey(String ingredientKey) {
+    return UUID.nameUUIDFromBytes(
+            (ingredientKey + ":inventory").getBytes(java.nio.charset.StandardCharsets.UTF_8))
+        .toString();
+  }
+
+  private void continueIngredientCreation(Ingredient item, PendingWrite parent) {
+    try {
+      JSONObject p = new JSONObject(parent.canonicalPayload);
+      JSONObject body =
+          new JSONObject()
+              .put("ingredientId", item.getId().toString())
+              .put("unit", item.getUnit().getValue())
+              .put("quantity", p.getString("quantity"))
+              .put("location", p.getString("location"))
+              .put("expiresOn", p.isNull("expiresOn") ? JSONObject.NULL : p.getString("expiresOn"))
+              .put("ingredientRequestKey", parent.key);
+      String child = childKey(parent.key);
+      message = "食材已建立，正在保存库存…";
+      changed();
+      calls
+          .pendingWrites()
+          .listPending(
+              parent.userId,
+              new ApiCallback<List<PendingWrite>>() {
+                @Override
+                public void onSuccess(List<PendingWrite> values) {
+                  if (!current()) return;
+                  PendingWrite found =
+                      values.stream().filter(w -> w.key.equals(child)).findFirst().orElse(null);
+                  if (found != null) {
+                    if (!found.operationId.equals("createInventoryBatch")
+                        || !found.canonicalPayload.equals(body.toString())
+                        || !Objects.equals(found.householdId, parent.householdId)) {
+                      childFailure();
+                      return;
+                    }
+                    activateChild(parent, found);
+                    return;
+                  }
+                  calls
+                      .pendingWrites()
+                      .record(
+                          child,
+                          parent.userId,
+                          parent.householdId,
+                          "createInventoryBatch",
+                          body.toString(),
+                          null,
+                          null,
+                          new ApiCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void value) {
+                              if (current()) continueIngredientCreation(item, parent);
+                            }
+
+                            @Override
+                            public void onError(ApiError error) {
+                              if (current()) childFailure();
+                            }
+                          });
+                }
+
+                @Override
+                public void onError(ApiError error) {
+                  if (current()) childFailure();
+                }
+              });
+    } catch (org.json.JSONException invalid) {
+      childFailure();
+    }
+  }
+
+  private void activateChild(PendingWrite parent, PendingWrite child) {
     calls
         .pendingWrites()
         .confirm(
-            write.userId,
-            write.key,
+            parent.userId,
+            parent.key,
             new ApiCallback<Void>() {
               @Override
               public void onSuccess(Void value) {
-                if (!current()) return;
-                pending = null;
-                busy = false;
-                load();
-                outcome =
-                    "操作已保存".equals(result) || result.startsWith("已结束") ? result : errorText(result);
-                message = outcome;
-                changed();
+                if (current()) {
+                  pending = child;
+                  dispatch();
+                }
+              }
+
+              @Override
+              public void onError(ApiError error) {
+                if (current()) childFailure();
+              }
+            });
+  }
+
+  private void childFailure() {
+    busy = false;
+    message = "食材资料已保存，库存尚待确认。请使用原请求重试。";
+    changed();
+  }
+
+  private void confirmKeys(String owner, List<String> keys, int index, Runnable done) {
+    if (!current()) return;
+    if (index == keys.size()) {
+      done.run();
+      return;
+    }
+    calls
+        .pendingWrites()
+        .confirm(
+            owner,
+            keys.get(index),
+            new ApiCallback<Void>() {
+              @Override
+              public void onSuccess(Void value) {
+                confirmKeys(owner, keys, index + 1, done);
               }
 
               @Override
@@ -507,6 +734,10 @@ final class InventoryViewModel extends ViewModel {
       case "NETWORK_ERROR", "TIMEOUT" -> "连接失败，请确认后端已启动并检查网络";
       case "LOCAL_STORAGE_ERROR" -> "本地记录不可用，本次没有继续提交";
       case "HOUSEHOLD_ACCESS_REVOKED" -> "你已失去该家庭的访问权限";
+      case "HOUSEHOLD_REQUIRED" -> "请先创建或加入家庭";
+      case "UNIT_CONFLICT" -> "该食材已有不同的标准单位，请刷新并核对单位";
+      case "INGREDIENT_INACTIVE" -> "该食材已停用，请维护食材资料后再录入";
+      case "NAME_CONFLICT" -> "食材名称已被其他成员录入，请刷新后重试";
       case "VALIDATION_ERROR" -> "输入未通过服务器校验";
       default -> "请求未完成：" + code;
     };

@@ -1,4 +1,17 @@
 <resources>
+    <color name="ac_fridge_background">#1B211E</color>
+    <color name="ac_fridge_panel">#28322C</color>
+    <color name="ac_fridge_muted">#A5B5A9</color>
+    <color name="ac_fridge_line">#47534B</color>
+    <color name="ac_fridge_accent">#A5C7A7</color>
+    <color name="ac_fridge_door_light">#63795D</color>
+    <color name="ac_fridge_door_dark">#445B44</color>
+    <color name="ac_fridge_drawer">#303C32</color>
+    <color name="ac_fridge_selected">#394B3C</color>
+    <color name="ac_fridge_soon">#F0BE76</color>
+    <color name="ac_fridge_soon_background">#483B25</color>
+    <color name="ac_fridge_expired">#F2A290</color>
+    <color name="ac_fridge_expired_background">#4C302A</color>
     <color name="ac_fridge_shell">#354034</color>
     <color name="ac_fridge_edge">#70816B</color>
     <color name="ac_fridge_inside">#263127</color>

@@ -41,6 +41,14 @@ class InventoryController implements InventoryApi {
   }
 
   @Override
+  public ResponseEntity<Ingredient> createIngredient(UUID key, CreateIngredientRequest body) {
+    return response(
+        inventory.createIngredient(
+            actor(), key, hash("/api/v1/ingredients", body, "CreateIngredientRequest"), body),
+        Ingredient.class);
+  }
+
+  @Override
   public ResponseEntity<InventoryBatchPage> listInventoryBatches(
       UUID home, UUID ingredient, ExpiryStatus status, Integer page, Integer size) {
     return ResponseEntity.ok(

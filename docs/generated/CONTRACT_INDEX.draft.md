@@ -9,6 +9,7 @@
 | commitPlan | POST | /api/v1/households/{householdId}/plan-commits | B | application/json: PlanCommitRequest | 200 application/json: PlanSlot[] |
 | confirmCooking | POST | /api/v1/households/{householdId}/cooking-events | D+E | application/json: ConfirmCookingRequest | 201 application/json: CookingEvent |
 | createHousehold | POST | /api/v1/households | E | application/json: CreateHouseholdRequest | 201 application/json: Household |
+| createIngredient | POST | /api/v1/ingredients | C | application/json: CreateIngredientRequest | 200 application/json: Ingredient; 201 application/json: Ingredient |
 | createInventoryBatch | POST | /api/v1/households/{householdId}/inventory-batches | C | application/json: CreateInventoryBatchRequest | 201 application/json: InventoryBatch |
 | createInvitation | POST | /api/v1/households/{householdId}/invitations | E | — | 201 application/json: Invitation |
 | createMealEntry | POST | /api/v1/me/meal-entries | D | application/json: CreateMealEntryRequest | 201 application/json: MealEntry |

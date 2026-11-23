@@ -21,8 +21,8 @@ class InventoryErrors {
     int status =
         switch (error.code) {
           case "NOT_FOUND" -> 404;
-          case "HOUSEHOLD_ACCESS_REVOKED" -> 403;
-          case "VERSION_CONFLICT" -> 409;
+          case "HOUSEHOLD_ACCESS_REVOKED", "HOUSEHOLD_REQUIRED" -> 403;
+          case "VERSION_CONFLICT", "UNIT_CONFLICT", "INGREDIENT_INACTIVE", "NAME_CONFLICT" -> 409;
           default -> 500;
         };
     return ApiExceptionHandler.response(
